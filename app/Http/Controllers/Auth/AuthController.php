@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller
@@ -28,8 +29,56 @@ class AuthController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // 1. Validasi input login
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
+        ]);
+
+        // 2. Autentikasi pengguna
+        if (! Auth::attempt(
+            $credentials,
+            $request->boolean('remember')
+        )) {
+            return back()
+                ->withErrors([
+                    'email' => 'Email atau password tidak sesuai.',
+                ])
+                ->onlyInput('email');
+        }
+
+        // 3. Regenerasi session setelah login
+        $request->session()->regenerate();
+
+        // 4. Ambil role pengguna
+        $roleName = $request->user()->role?->name;
+
+        // 5. Pastikan role pengguna diizinkan
+        $dashboardRoute = match ($roleName) {
+            'owner' => 'owner.dashboard',
+            'kasir' => 'kasir.dashboard',
+            'pelanggan' => 'pelanggan.dashboard',
+            default => null,
+        };
+
+        // 6. Tolak akun yang tidak memiliki role yang diizinkan
+        if ($dashboardRoute === null) {
+            Auth::logout();
+
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()
+                ->route('login')
+                ->withErrors([
+                    'email' => 'Akun Anda tidak memiliki akses ke aplikasi.',
+                ]);
+        }
+
+        // 7. Arahkan pengguna ke dashboard sesuai role
+        return redirect()->intended(route($dashboardRoute));
     }
+    
 
     /**
      * Display the specified resource.
@@ -58,8 +107,14 @@ class AuthController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request)
     {
-        //
+        Auth::logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
     }
 }
