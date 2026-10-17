@@ -1,0 +1,147 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: app
+    image: kantin-baraya-app:latest
+    container_name: kantinbaraya_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+
+    # Disesuaikan untuk VPS 1 GB (total limit app+nginx+db = 832m). Naikin kalau RAM lebih besar.
+    mem_limit: 384m
+    mem_reservation: 192m
+
+    # TIDAK ADA bind mount kode (.:/var/www/html) dan TIDAK ADA anonymous volume public/build.
+    # Kode + hasil build sudah ada di dalam image.
+    volumes:
+      - storage_data:/var/www/html/storage
+
+    env_file:
+      - .env
+
+    environment:
+      HOME: /tmp
+      APP_ENV: production
+      APP_DEBUG: "false"
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:?DB_DATABASE belum diisi}
+      DB_USERNAME: ${DB_USERNAME:?DB_USERNAME belum diisi}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD belum diisi}
+
+    healthcheck:
+      test: ["CMD-SHELL", "php-fpm -t"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+    networks:
+      - laravel
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: nginx
+    image: kantin-baraya-web:latest
+    container_name: kantinbaraya_nginx
+    restart: unless-stopped
+
+    mem_limit: 64m
+
+    ports:
+      - "80:80"
+      - "443:443"
+
+    volumes:
+      # Folder public/ sudah ada di dalam image nginx (dicopy dari image app),
+      # jadi hash asset PASTI sama dengan yang dirujuk PHP.
+      # Storage dibaca read-only supaya file upload (public/storage -> storage/app/public) bisa diakses.
+      - storage_data:/var/www/html/storage:ro
+      # Sertifikat Let's Encrypt + folder webroot untuk validasi domain
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - certbot_www:/var/www/certbot:ro
+
+    networks:
+      - laravel
+
+    depends_on:
+      app:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.4
+    container_name: kantinbaraya_db
+    restart: unless-stopped
+
+    mem_limit: 384m
+
+    command:
+      - --performance-schema=OFF
+      - --innodb-buffer-pool-size=64M
+      - --innodb-log-buffer-size=1M
+      - --max-connections=30
+      - --key-buffer-size=8M
+      - --thread-stack=128K
+      - --table-open-cache=200
+      - --sort-buffer-size=256K
+      - --read-buffer-size=128K
+      - --read-rnd-buffer-size=256K
+
+    # Port MySQL sengaja TIDAK di-expose ke host/publik.
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD belum diisi}
+
+    volumes:
+      - db_data:/var/lib/mysql
+
+    networks:
+      - laravel
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p${DB_ROOT_PASSWORD}"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Hanya dijalankan manual (tidak ikut "up -d"):
+  #   docker compose -f docker-compose.prod.yml run --rm certbot certonly ...
+  certbot:
+    image: certbot/certbot
+    profiles: ["certbot"]
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    networks:
+      - laravel
+
+networks:
+  laravel:
+    driver: bridge
+
+volumes:
+  db_data:
+  storage_data:
+  certbot_www:

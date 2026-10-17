@@ -1,0 +1,98 @@
+
+@import "tailwindcss";
+@import "home";
+
+
+@source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php";
+@source "../../storage/framework/views/*.php";
+@source "../**/*.blade.php";
+@source "../**/*.js";
+
+
+@theme {
+    /* Primary */
+    --color-primary: #e64a19;
+    --color-primary-light: #ff6f43;
+    --color-primary-dark: #d83b01;
+    --color-primary-sidebar: #e32a26;
+
+    /* Accent */
+    --color-accent-yellow: #ffc250;
+    --color-accent-gold: #ffb830;
+    --color-accent-red: #e53935;
+    --color-accent-darkred: #8c1818;
+
+    /* Typography */
+    --color-typography-heading: #1e1e1e;
+    --color-typography-body: #666666;
+    --color-typography-muted: #9e9e9e;
+    --color-typography-light: #ffd6d6;
+    --color-typography-white: #ffffff;
+
+    /* Surfaces */
+    --color-surface-bg: #f8f9fa;
+    --color-surface-card: #ffffff;
+    --color-surface-orange: #ff8a3d;
+
+    /* Font */
+    --font-sans: "Poppins", "Inter", sans-serif;
+
+    /* Border radius */
+    --radius-4xl: 2rem;
+    --radius-5xl: 2.5rem;
+}
+
+@layer base {
+    html {
+        font-family: var(--font-sans);
+        scroll-behavior: smooth;
+    }
+
+    body {
+        min-height: 100vh;
+        background-color: var(--color-surface-bg);
+        color: var(--color-typography-heading);
+        font-family: var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+        font: inherit;
+    }
+
+    button {
+        cursor: pointer;
+    }
+
+    button:disabled {
+        cursor: not-allowed;
+    }
+}
+
+
+@layer components {
+    .auth-pattern {
+        background-image: radial-gradient(
+            rgba(255, 255, 255, 0.15) 1px,
+            transparent 1px
+        );
+        background-size: 22px 22px;
+    }
+
+    .field:focus-within {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 4px rgba(230, 74, 25, 0.1);
+    }
+
+    .field input:focus {
+        outline: none;
+    }
+
+    .field-error {
+        border-color: var(--color-accent-red) !important;
+    }
+}
