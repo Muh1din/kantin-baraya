@@ -11,6 +11,11 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        // Demo accounts use a fixed local password and must not exist in production.
+        if (app()->environment('production')) {
+            return;
+        }
+
         $ownerRoleId = Role::where('name', 'owner')->value('id');
         $kasirRoleId = Role::where('name', 'kasir')->value('id');
         $pelangganRoleId = Role::where('name', 'pelanggan')->value('id');
