@@ -41,7 +41,7 @@ class MenuController extends Controller
     {
         $categories = MenuCategory::query()
             ->where('is_active', true)
-            ->when($menu->category_id, fn ($query) => $query->orWhereKey($menu->category_id))
+            ->when($menu->category_id, fn ($query) => $query->orWhere('id', $menu->category_id))
             ->orderBy('name')
             ->get();
 

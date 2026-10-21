@@ -1,4 +1,4 @@
-<x-layouts.login title="Edit Bahan Baku">
+<x-layouts.owner title="Edit Bahan Baku">
     <main class="min-h-screen px-4 py-8 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-3xl">
             <a href="{{ route('owner.ingredients.index') }}" class="text-sm font-semibold text-orange-600 hover:text-orange-700">← Kembali ke daftar bahan</a>
@@ -39,4 +39,4 @@
             </section>
         </div>
     </main>
-</x-layouts.login>
+</x-layouts.owner>
