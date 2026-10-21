@@ -3,18 +3,18 @@
 namespace App\Http\Controllers\Home;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\DB;
+use App\Models\Menu;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        $menus = DB::table('menus')
+        $menus = Menu::query()
             ->where('is_available', true)
-            ->orderBy('category')
+            ->where('stock', '>', 0)
             ->orderBy('name')
             ->get();
 
-        return view('pelanggan.index', compact('menus'));
+        return view('home.index', compact('menus'));
     }
 }

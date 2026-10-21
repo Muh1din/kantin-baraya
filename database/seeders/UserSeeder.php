@@ -11,46 +11,25 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Demo accounts use a fixed local password and must not exist in production.
-        if (app()->environment('production')) {
-            return;
-        }
+        $accounts = [
+            ['name' => 'owner', 'email' => 'owner@kantinbaraya.test', 'role' => 'owner'],
+            ['name' => 'cashier', 'email' => 'kasir@kantinbaraya.test', 'role' => 'kasir'],
+            ['name' => 'customer', 'email' => 'pelanggan@kantinbaraya.test', 'role' => 'pelanggan'],
+            ['name' => 'chef', 'email' => 'koki@kantinbaraya.test', 'role' => 'koki'],
+        ];
 
-        $ownerRoleId = Role::where('name', 'owner')->value('id');
-        $kasirRoleId = Role::where('name', 'kasir')->value('id');
-        $pelangganRoleId = Role::where('name', 'pelanggan')->value('id');
+        foreach ($accounts as $account) {
+            $role = Role::where('name', $account['role'])->firstOrFail();
 
-        if (! $ownerRoleId || ! $kasirRoleId || ! $pelangganRoleId) {
-            throw new \RuntimeException(
-                'Role owner, kasir, dan pelanggan harus tersedia.'
+            User::updateOrCreate(
+                ['email' => $account['email']],
+                [
+                    'name' => $account['name'],
+                    'role_id' => $role->id,
+                    'password' => Hash::make('password'),
+                    'email_verified_at' => now(),
+                ],
             );
         }
-
-        User::updateOrCreate(
-            ['email' => 'owner@kantinbaraya.test'],
-            [
-                'name' => 'Owner Kantin',
-                'password' => Hash::make('rahasia'),
-                'role_id' => $ownerRoleId,
-            ]
-        );
-
-        User::updateOrCreate(
-            ['email' => 'kasir@kantinbaraya.test'],
-            [
-                'name' => 'Kasir Kantin',
-                'password' => Hash::make('rahasia'),
-                'role_id' => $kasirRoleId,
-            ]
-        );
-
-        User::updateOrCreate(
-            ['email' => 'pelanggan@kantinbaraya.test'],
-            [
-                'name' => 'Pelanggan Kantin',
-                'password' => Hash::make('rahasia'),
-                'role_id' => $pelangganRoleId,
-            ]
-        );
     }
 }

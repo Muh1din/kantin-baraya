@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Models\Role;
 
 class AuthController extends Controller
 {
@@ -13,6 +14,14 @@ class AuthController extends Controller
      */
     public function index()
     {
+        if (Auth::check()) {
+            $route = $this->dashboardRoute(Auth::user()->role?->name);
+
+            if ($route) {
+                return redirect()->route($route);
+            }
+        }
+
         return view('auth.login');
     }
 
@@ -51,15 +60,7 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         // 4. Ambil role pengguna
-        $roleName = $request->user()->role?->name;
-
-        // 5. Pastikan role pengguna diizinkan
-        $dashboardRoute = match ($roleName) {
-            'owner' => 'owner.dashboard',
-            'kasir' => 'kasir.dashboard',
-            'pelanggan' => 'pelanggan.dashboard',
-            default => null,
-        };
+        $dashboardRoute = $this->dashboardRoute($request->user()->role?->name);
 
         // 6. Tolak akun yang tidak memiliki role yang diizinkan
         if ($dashboardRoute === null) {
@@ -77,6 +78,17 @@ class AuthController extends Controller
 
         // 7. Arahkan pengguna ke dashboard sesuai role
         return redirect()->intended(route($dashboardRoute));
+    }
+
+    private function dashboardRoute(?string $roleName): ?string
+    {
+        return match ($roleName) {
+            'owner' => 'owner.dashboard',
+            'kasir' => 'kasir.dashboard',
+            'pelanggan' => 'pelanggan.dashboard',
+            'koki' => 'koki.dashboard',
+            default => null,
+        };
     }
     
 
