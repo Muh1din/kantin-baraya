@@ -55,8 +55,8 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
-    public function sales(): HasMany
-    {
-        return $this->hasMany(Sale::class, 'cashier_id');
-    }
+    // public function sales(): HasMany
+    // {
+    //     return $this->hasMany(sales::class, 'cashier_id');
+    // }
 }

@@ -1,5 +1,5 @@
 <x-layouts.home>
-    <section class="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
+    {{-- <section class="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
         <header class="mb-8 rounded-2xl bg-orange-50 px-5 py-6 sm:px-8">
             <p class="text-sm font-bold uppercase tracking-wider text-orange-600">Menu Kantin Baraya</p>
             <h1 class="mt-2 text-3xl font-black text-stone-900">{{ $table->table_code }}</h1>
@@ -42,5 +42,7 @@
                 @endforeach
             </div>
         @endif
-    </section>
+    </section> --}}
+
+    <h1>hahaha</h1>
 </x-layouts.home>

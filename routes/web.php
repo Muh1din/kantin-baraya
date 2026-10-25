@@ -11,6 +11,9 @@ use App\Http\Controllers\Owner\IngredientController;
 use App\Http\Controllers\Owner\IngredientStockMovementController;
 use App\Http\Controllers\Owner\RecipeController;
 use App\Http\Controllers\Cashier\PosController;
+use App\Http\Controllers\Customer\CustomerController;
+use App\Http\Controllers\Customer\MenuCatalog;
+use App\Http\Controllers\Customer\MenuCatalogController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])
@@ -43,6 +46,61 @@ Route::middleware(['auth', 'role:koki'])->get('/koki/dashboard', [DashboardContr
 //     Route::post('/checkout', [PosController::class, 'checkout'])->name('checkout');
 //     Route::get('/sales/{sale}', [PosController::class, 'receipt'])->name('receipt');
 // });
+
+// Route::prefix('customer')
+//     ->name('customer.')
+//     ->middleware(['auth', 'role:customer'])
+//     ->group(function () {
+//         Route::get('/dashboard', [CustomerController::class, 'index'])->name('dashboard');
+//     });
+
+Route::prefix('customer')
+    ->name('customer.')
+    ->middleware(['auth', 'role:customer'])
+    ->group(function () {
+
+        // 1. Dashboard / Beranda
+        Route::get('/dashboard', [CustomerController::class, 'index'])->name('dashboard');
+
+        // Fitur Scan QR Meja Dine-in
+        Route::get('/scan-qr', [CustomerController::class, 'scanQr'])->name('scan-qr');
+
+        // 2. Katalog Menu
+        Route::get('/menus', [MenuCatalogController::class, 'index'])->name('menus.index');
+
+        // 3. Keranjang & Checkout
+        // Route::prefix('cart')->name('cart.')->group(function () {
+        //     Route::get('/', [CartController::class, 'index'])->name('index');
+        //     Route::post('/add', [CartController::class, 'add'])->name('add');
+        //     Route::patch('/update/{id}', [CartController::class, 'update'])->name('update');
+        //     Route::delete('/remove/{id}', [CartController::class, 'remove'])->name('remove');
+        //     Route::post('/checkout', [CartController::class, 'checkout'])->name('checkout');
+        // });
+
+        // // 4. Pesanan Saya & Live Tracking
+        // Route::prefix('orders')->name('orders.')->group(function () {
+        //     Route::get('/', [OrderController::class, 'index'])->name('index');
+        //     Route::get('/{token_pelacakan}', [OrderController::class, 'show'])->name('show');
+        // });
+
+        // // 5. Loyalty & Reward
+        // Route::prefix('loyalty')->name('loyalty.')->group(function () {
+        //     Route::get('/', [LoyaltyController::class, 'index'])->name('index');
+        //     Route::post('/redeem/{id}', [LoyaltyController::class, 'redeem'])->name('redeem');
+        // });
+
+        // // 6. Notifikasi
+        // Route::prefix('notifications')->name('notifications.index')->group(function () {
+        //     Route::get('/', [NotificationController::class, 'index'])->name('index');
+        //     Route::patch('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
+        // });
+
+        // // 7. Pengaturan Profil
+        // Route::prefix('profile')->name('profile.')->group(function () {
+        //     Route::get('/', [ProfileController::class, 'edit'])->name('edit');
+        //     Route::patch('/', [ProfileController::class, 'update'])->name('update');
+        // });
+    });
 
 Route::prefix('owner')
     ->name('owner.')
@@ -147,4 +205,3 @@ Route::prefix('owner')
         // Log Aktivitas
         // Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
     });
-;

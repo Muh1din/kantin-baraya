@@ -14,7 +14,7 @@ class UserSeeder extends Seeder
         $accounts = [
             ['name' => 'owner', 'email' => 'owner@kantinbaraya.test', 'role' => 'owner'],
             ['name' => 'cashier', 'email' => 'kasir@kantinbaraya.test', 'role' => 'kasir'],
-            ['name' => 'customer', 'email' => 'pelanggan@kantinbaraya.test', 'role' => 'pelanggan'],
+            ['name' => 'customer', 'email' => 'customer@kantinbaraya.test', 'role' => 'customer'],
             ['name' => 'chef', 'email' => 'koki@kantinbaraya.test', 'role' => 'koki'],
         ];
 

@@ -100,3 +100,37 @@
 [x-cloak] {
     display: none !important;
 }
+
+@layer components {
+    .cart-overlay {
+        opacity: 0;
+        transition: opacity 220ms ease;
+    }
+
+    .cart-overlay-visible {
+        opacity: 1;
+    }
+
+    .cart-drawer {
+        transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .cart-count-pop {
+        animation: cart-count-pop 260ms ease-out;
+    }
+
+    @keyframes cart-count-pop {
+        50% {
+            transform: scale(1.22);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .cart-overlay,
+        .cart-drawer,
+        .cart-count-pop {
+            animation: none;
+            transition-duration: 0.01ms;
+        }
+    }
+}
