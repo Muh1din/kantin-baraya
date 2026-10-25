@@ -10,10 +10,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
-use LogicException;
-use App\Models\Sale; // Keep just in case if referenced elsewhere, but the task asked for orders
 
-class SaleService
+class OrderService
 {
     public function create(array $items, int $cashierId, ?string $idempotencyKey = null, ?int $cashReceived = null, string $customerName = ''): Order
     {
@@ -42,16 +40,14 @@ class SaleService
             $normalizedInput[$menuId] = $quantity;
         }
         ksort($normalizedInput);
-        $requestHash = hash('sha256', json_encode([$cashierId, $normalizedInput, $cashReceived, $customerName], JSON_THROW_ON_ERROR));
 
-        return DB::transaction(function () use ($items, $cashierId, $idempotencyKey, $cashReceived, $customerName, $normalizedInput, $requestHash): Order {
+        return DB::transaction(function () use ($items, $cashierId, $idempotencyKey, $cashReceived, $customerName, $normalizedInput): Order {
             $cashier = User::query()->with('role')->lockForUpdate()->findOrFail($cashierId);
-            if ($cashier->role?->name !== 'kasir') {
+            if (! in_array($cashier->role?->name, ['kasir', 'cashier'], true)) {
                 throw new InvalidArgumentException('Transaksi hanya dapat dibuat oleh pengguna dengan role kasir.');
             }
 
             if ($idempotencyKey !== null) {
-                // Assuming Order has similar idempotency logic or adapt accordingly if needed
                 $existingOrder = Order::query()->where('tracking_token', $idempotencyKey)->first();
                 if ($existingOrder) {
                     return $existingOrder->load(['items', 'payment']);
@@ -96,7 +92,7 @@ class SaleService
             }
 
             $order = Order::create([
-                'order_code' => 'ORD-' . now()->format('YmdHis'),
+                'order_code' => 'ORD-' . now()->format('YmdHis') . '-' . Str::random(4),
                 'tracking_token' => $idempotencyKey ?? Str::random(32),
                 'customer_name' => $customerName,
                 'order_channel' => 'pos',

@@ -10,7 +10,12 @@ class DashboardController extends Controller
 {
     public function index(Request $request): View
     {
-        $role = $request->user()->role?->name;
+        $role = match ($request->user()->role?->name) {
+            'cashier' => 'kasir',
+            'customer' => 'pelanggan',
+            'chef' => 'koki',
+            default => $request->user()->role?->name,
+        };
 
         if ($role === 'owner') {
             return view('owner.dashboard', [

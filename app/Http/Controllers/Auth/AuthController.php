@@ -84,9 +84,12 @@ class AuthController extends Controller
     {
         return match ($roleName) {
             'owner' => 'owner.dashboard',
-            'kasir' => 'kasir.dashboard',
+            'kasir',
+            'cashier' => 'kasir.dashboard',
+            'pelanggan' => 'pelanggan.dashboard',
             'customer' => 'customer.dashboard',
-            'koki' => 'koki.dashboard',
+            'koki',
+            'chef' => 'koki.dashboard',
             default => null,
         };
     }

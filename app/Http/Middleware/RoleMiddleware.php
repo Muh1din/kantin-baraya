@@ -8,9 +8,30 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
+    /**
+     * Role names used by older routes and newer seed data share the same
+     * permissions. Keep the route-level role checks while accepting both names.
+     */
+    private const ROLE_ALIASES = [
+        'owner' => 'owner',
+        'kasir' => 'cashier',
+        'cashier' => 'cashier',
+        'pelanggan' => 'customer',
+        'customer' => 'customer',
+        'koki' => 'chef',
+        'chef' => 'chef',
+    ];
+
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        abort_unless($request->user() && in_array($request->user()->role?->name, $roles, true), 403);
+        $userRole = $request->user()?->role?->name;
+        $userRole = self::ROLE_ALIASES[$userRole] ?? $userRole;
+        $allowedRoles = array_map(
+            static fn (string $role): string => self::ROLE_ALIASES[$role] ?? $role,
+            $roles,
+        );
+
+        abort_unless($userRole !== null && in_array($userRole, $allowedRoles, true), 403);
 
         return $next($request);
     }

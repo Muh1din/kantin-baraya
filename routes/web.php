@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Guest\GuestOrderController;
 use App\Http\Controllers\Owner\TableController;
 use App\Http\Controllers\Owner\ReportController;
 use App\Http\Controllers\Home\HomeController;
@@ -40,12 +41,19 @@ Route::middleware(['auth', 'role:kasir'])->get('/kasir/dashboard', [DashboardCon
 Route::middleware(['auth', 'role:pelanggan'])->get('/pelanggan/dashboard', [DashboardController::class, 'index'])->name('pelanggan.dashboard');
 Route::middleware(['auth', 'role:koki'])->get('/koki/dashboard', [DashboardController::class, 'index'])->name('koki.dashboard');
 
-// Route::prefix('kasir/pos')->name('kasir.pos.')->middleware(['auth', 'role:kasir'])->group(function () {
-//     Route::get('/', [PosController::class, 'index'])->name('index');
-//     Route::get('/history', [PosController::class, 'history'])->name('history');
-//     Route::post('/checkout', [PosController::class, 'checkout'])->name('checkout');
-//     Route::get('/sales/{sale}', [PosController::class, 'receipt'])->name('receipt');
-// });
+Route::prefix('kasir/pos')->name('kasir.pos.')->middleware(['auth', 'role:kasir'])->group(function () {
+    Route::get('/', [PosController::class, 'index'])->name('index');
+    Route::get('/history', [PosController::class, 'history'])->name('history');
+    Route::post('/checkout', [PosController::class, 'checkout'])->name('checkout');
+    Route::get('/orders/{order}', [PosController::class, 'receipt'])->name('receipt');
+});
+
+// Guest
+Route::post('/guest/orders', [GuestOrderController::class, 'store'])
+    ->name('guest.orders.store');
+
+Route::post('/guest/orders/{token}/payment-proof',[GuestOrderController::class, 'uploadPaymentProof'])
+    ->name('guest.orders.payment-proof');
 
 // Route::prefix('customer')
 //     ->name('customer.')

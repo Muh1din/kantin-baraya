@@ -27,6 +27,24 @@ class LoginTest extends TestCase
         $this->get(route('kasir.dashboard'))->assertOk()->assertSee('Dashboard Kasir');
     }
 
+    public function test_seeded_english_cashier_role_can_open_only_cashier_features(): void
+    {
+        $role = Role::create(['name' => 'cashier']);
+        $user = User::factory()->create([
+            'role_id' => $role->id,
+            'password' => 'password',
+        ]);
+
+        $this->post(route('login.store'), [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertRedirect(route('kasir.dashboard'));
+
+        $this->get(route('kasir.dashboard'))->assertOk()->assertSee('Dashboard Kasir');
+        $this->get(route('kasir.pos.index'))->assertOk();
+        $this->get(route('owner.dashboard'))->assertForbidden();
+    }
+
     public function test_user_can_log_out_from_dashboard(): void
     {
         $role = Role::create(['name' => 'owner']);

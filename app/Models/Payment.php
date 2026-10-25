@@ -12,8 +12,18 @@ class Payment extends Model
         'payment_method',
         'payment_status',
         'amount',
+        'proof_image',
+        'transaction_reference',
         'paid_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'amount' => 'decimal:2',
+            'paid_at' => 'datetime',
+        ];
+    }
 
     public function order(): BelongsTo
     {

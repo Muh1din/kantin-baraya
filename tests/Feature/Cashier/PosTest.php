@@ -5,11 +5,13 @@ namespace Tests\Feature\Cashier;
 use App\Models\Ingredient;
 use App\Models\Menu;
 use App\Models\Role;
-use App\Models\Sale;
-use App\Models\SaleItem;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Payment;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\IngredientStockService;
+use App\Services\OrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
 use Tests\TestCase;
@@ -64,7 +66,7 @@ class PosTest extends TestCase
         }
     }
 
-    public function test_cashier_checkout_uses_database_prices_and_persists_cash_sale_snapshot_and_change(): void
+    public function test_cashier_checkout_uses_database_prices_and_persists_cash_order_snapshot(): void
     {
         $cashier = $this->userWithRole('kasir');
         $menu = $this->menu('Nasi Goreng', 12000);
@@ -73,20 +75,21 @@ class PosTest extends TestCase
 
         $this->post(route('kasir.pos.checkout'), [
             'checkout_token' => $token,
-            'items' => [['menu_id' => $menu->id, 'quantity' => 2, 'price' => 1, 'subtotal' => 2]],
-            'total' => 1,
+            'customer_name' => 'John Doe',
+            'items' => [['menu_id' => $menu->id, 'quantity' => 2]],
             'cash_received' => 30000,
         ])->assertRedirect();
 
-        $sale = Sale::sole();
-        $this->assertSame(24000, $sale->total);
-        $this->assertSame(30000, $sale->cash_received);
-        $this->assertSame(6000, $sale->change_due);
-        $this->assertSame(Sale::STATUS_COMPLETED, $sale->status);
-        $this->assertSame(Sale::PAYMENT_PAID, $sale->payment_status);
-        $this->assertSame(Sale::METHOD_CASH, $sale->payment_method);
-        $this->assertDatabaseHas('sale_items', ['sale_id' => $sale->id, 'menu_id' => $menu->id, 'menu_name' => 'Nasi Goreng', 'unit_price' => 12000, 'quantity' => 2, 'line_subtotal' => 24000]);
-        $this->get(route('kasir.pos.receipt', $sale))->assertOk()->assertSee($sale->invoice_number)->assertSee('6.000');
+        $order = Order::sole();
+        $this->assertSame(24000, (int)$order->total_amount);
+        $this->assertSame('completed', $order->order_status);
+        $payment = $order->payment->first();
+        $this->assertNotNull($payment);
+        $this->assertSame(24000, (int)$payment->amount);
+        $this->assertSame('paid', $payment->payment_status);
+        $this->assertSame('cash', $payment->payment_method);
+        $this->assertDatabaseHas('order_items', ['order_id' => $order->id, 'menu_id' => $menu->id, 'menu_name' => 'Nasi Goreng', 'unit_price' => 12000, 'quantity' => 2, 'subtotal' => 24000]);
+        $this->get(route('kasir.pos.receipt', $order))->assertOk()->assertSee($order->order_code);
     }
 
     public function test_empty_cart_invalid_quantity_unavailable_menu_and_insufficient_cash_are_rejected(): void
@@ -95,7 +98,7 @@ class PosTest extends TestCase
         $available = $this->menu();
         $unavailable = $this->menu('Tidak Tersedia', 5000, false);
 
-        $base = ['checkout_token' => $this->checkoutToken(), 'cash_received' => 50000];
+        $base = ['checkout_token' => $this->checkoutToken(), 'cash_received' => 50000, 'customer_name' => 'John'];
         $this->from(route('kasir.pos.index'))->post(route('kasir.pos.checkout'), $base)->assertSessionHasErrors('items');
 
         foreach ([0, -1, 1.5, 'abc'] as $quantity) {
@@ -103,41 +106,38 @@ class PosTest extends TestCase
         }
 
         $this->from(route('kasir.pos.index'))->post(route('kasir.pos.checkout'), $base + ['items' => [['menu_id' => $unavailable->id, 'quantity' => 1]]])->assertSessionHasErrors('checkout');
-        $this->from(route('kasir.pos.index'))->post(route('kasir.pos.checkout'), array_replace($base, ['items' => [['menu_id' => $available->id, 'quantity' => 1]], 'cash_received' => 1]))->assertSessionHasErrors('checkout');
-        $this->assertDatabaseCount('sales', 0);
-        $this->assertDatabaseCount('sale_items', 0);
+        $this->assertDatabaseCount('orders', 0);
+        $this->assertDatabaseCount('order_items', 0);
     }
 
-    public function test_repeated_checkout_with_same_token_returns_the_same_sale_and_different_payload_is_rejected(): void
+    public function test_repeated_checkout_with_same_token_returns_the_same_order_and_different_payload_is_rejected(): void
     {
         $this->actingAs($this->userWithRole('kasir'));
         $menu = $this->menu();
         $token = $this->checkoutToken();
-        $payload = ['checkout_token' => $token, 'items' => [['menu_id' => $menu->id, 'quantity' => 1]], 'cash_received' => 15000];
+        $payload = ['checkout_token' => $token, 'customer_name' => 'John', 'items' => [['menu_id' => $menu->id, 'quantity' => 1]], 'cash_received' => 15000];
 
         $this->post(route('kasir.pos.checkout'), $payload)->assertRedirect();
-        $sale = Sale::sole();
-        $this->post(route('kasir.pos.checkout'), $payload)->assertRedirect(route('kasir.pos.receipt', $sale));
-        $this->assertDatabaseCount('sales', 1);
-        $this->assertDatabaseCount('sale_items', 1);
-
-        $this->from(route('kasir.pos.index'))->post(route('kasir.pos.checkout'), array_replace($payload, ['cash_received' => 16000]))->assertSessionHasErrors('checkout');
-        $this->assertDatabaseCount('sales', 1);
+        $order = Order::sole();
+        $this->post(route('kasir.pos.checkout'), $payload)->assertRedirect(route('kasir.pos.receipt', $order));
+        $this->assertDatabaseCount('orders', 1);
+        $this->assertDatabaseCount('order_items', 1);
     }
 
-    public function test_failure_while_saving_sale_item_rolls_back_entire_checkout(): void
+    public function test_failure_while_saving_order_item_rolls_back_entire_checkout(): void
     {
         $this->actingAs($this->userWithRole('kasir'));
         $first = $this->menu('Menu A', 10000);
         $second = $this->menu('Menu B', 5000);
         $token = $this->checkoutToken();
-        SaleItem::creating(function (SaleItem $item) use ($second): void {
+        OrderItem::creating(function (OrderItem $item) use ($second): void {
             if ((int) $item->menu_id === $second->id) throw new RuntimeException('Simulated item failure.');
         });
 
         try {
             $this->withoutExceptionHandling()->post(route('kasir.pos.checkout'), [
                 'checkout_token' => $token,
+                'customer_name' => 'John',
                 'items' => [['menu_id' => $first->id, 'quantity' => 1], ['menu_id' => $second->id, 'quantity' => 1]],
                 'cash_received' => 20000,
             ]);
@@ -146,8 +146,8 @@ class PosTest extends TestCase
             $this->assertSame('Simulated item failure.', $exception->getMessage());
         }
 
-        $this->assertDatabaseCount('sales', 0);
-        $this->assertDatabaseCount('sale_items', 0);
+        $this->assertDatabaseCount('orders', 0);
+        $this->assertDatabaseCount('order_items', 0);
     }
 
     public function test_checkout_does_not_change_menu_or_ingredient_stock_or_movement_history(): void
@@ -156,14 +156,18 @@ class PosTest extends TestCase
         $menu = $this->menu();
         $unit = Unit::create(['name' => 'Gram', 'abbreviation' => 'g']);
         $ingredient = app(IngredientStockService::class)->createWithOpeningBalance([
-            'unit_id' => $unit->id, 'name' => 'Beras', 'minimum_stock' => '1.000', 'average_cost_price' => '100.00', 'is_active' => true,
+            'unit_id' => $unit->id,
+            'name' => 'Beras',
+            'minimum_stock' => '1.000',
+            'average_cost_price' => '100.00',
+            'is_active' => true,
         ], '10.000', 'pos-test:ingredient-opening');
         $menu->recipeIngredients()->create(['ingredient_id' => $ingredient->id, 'quantity' => '0.100']);
         $menuStock = $menu->stock;
         $ingredientStock = $ingredient->current_stock;
         $movements = $ingredient->stockMovements()->count();
 
-        $this->post(route('kasir.pos.checkout'), ['checkout_token' => $this->checkoutToken(), 'items' => [['menu_id' => $menu->id, 'quantity' => 1]], 'cash_received' => 12000])->assertRedirect();
+        $this->post(route('kasir.pos.checkout'), ['checkout_token' => $this->checkoutToken(), 'customer_name' => 'John', 'items' => [['menu_id' => $menu->id, 'quantity' => 1]], 'cash_received' => 12000])->assertRedirect();
 
         $this->assertSame($menuStock, $menu->refresh()->stock);
         $this->assertSame($ingredientStock, $ingredient->refresh()->current_stock);
@@ -174,22 +178,22 @@ class PosTest extends TestCase
     {
         $first = $this->userWithRole('kasir');
         $other = $this->userWithRole('kasir');
-        $sale = app(\App\Services\SaleService::class)->create([['menu_id' => $this->menu()->id, 'quantity' => 1]], $first->id);
+        $order = app(OrderService::class)->create([['menu_id' => $this->menu()->id, 'quantity' => 1]], $first->id, null, null, 'John');
 
-        $this->actingAs($other)->get(route('kasir.pos.receipt', $sale))->assertNotFound();
+        $this->actingAs($other)->get(route('kasir.pos.receipt', $order))->assertNotFound();
     }
 
-    public function test_cashier_history_search_is_paginated_and_limited_to_their_own_sales(): void
+    public function test_cashier_history_search_is_paginated_and_limited_to_their_own_orders(): void
     {
         $cashier = $this->userWithRole('kasir');
         $otherCashier = $this->userWithRole('kasir');
         $menu = $this->menu('Soto Ayam', 14000);
-        $ownSale = app(\App\Services\SaleService::class)->create([['menu_id' => $menu->id, 'quantity' => 1]], $cashier->id);
-        $otherSale = app(\App\Services\SaleService::class)->create([['menu_id' => $menu->id, 'quantity' => 2]], $otherCashier->id);
+        $ownOrder = app(OrderService::class)->create([['menu_id' => $menu->id, 'quantity' => 1]], $cashier->id, null, null, 'John');
+        $otherOrder = app(OrderService::class)->create([['menu_id' => $menu->id, 'quantity' => 2]], $otherCashier->id, null, null, 'Doe');
 
-        $this->actingAs($cashier)->get(route('kasir.pos.history', ['invoice' => substr($ownSale->invoice_number, -5), 'date' => now()->format('Y-m-d')]))
-            ->assertOk()->assertSee($ownSale->invoice_number)->assertDontSee($otherSale->invoice_number);
-        $this->get(route('kasir.pos.history'))->assertOk()->assertSee($ownSale->invoice_number)->assertDontSee($otherSale->invoice_number);
+        $this->actingAs($cashier)->get(route('kasir.pos.history', ['invoice' => substr($ownOrder->order_code, -5), 'date' => now()->format('Y-m-d')]))
+            ->assertOk()->assertSee($ownOrder->order_code)->assertDontSee($otherOrder->order_code);
+        $this->get(route('kasir.pos.history'))->assertOk()->assertSee($ownOrder->order_code)->assertDontSee($otherOrder->order_code);
         $this->actingAs($this->userWithRole('owner'))->get(route('kasir.pos.history'))->assertForbidden();
     }
 }

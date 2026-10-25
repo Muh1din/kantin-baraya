@@ -7,7 +7,7 @@ use App\Models\Menu;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
-use App\Services\SaleService;
+use App\Services\OrderService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -26,7 +26,7 @@ class PosController extends Controller
         ]);
     }
 
-    public function checkout(Request $request, SaleService $saleService): RedirectResponse
+    public function checkout(Request $request, OrderService $orderService): RedirectResponse
     {
         $validated = $request->validate([
             'checkout_token' => ['required', 'string', 'size:64'],
@@ -44,7 +44,7 @@ class PosController extends Controller
         }
 
         try {
-            $order = $saleService->create(
+            $order = $orderService->create(
                 $validated['items'],
                 (int) $request->user()->id,
                 $entry['idempotency_key'],
