@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Cashier;
 
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
-use App\Models\Sale;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Payment;
 use App\Services\SaleService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,6 +30,7 @@ class PosController extends Controller
     {
         $validated = $request->validate([
             'checkout_token' => ['required', 'string', 'size:64'],
+            'customer_name' => ['required', 'string', 'max:255'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.menu_id' => ['required', 'integer', 'min:1'],
             'items.*.quantity' => ['required', 'integer', 'min:1', 'max:10000'],
@@ -41,17 +44,18 @@ class PosController extends Controller
         }
 
         try {
-            $sale = $saleService->create(
+            $order = $saleService->create(
                 $validated['items'],
                 (int) $request->user()->id,
                 $entry['idempotency_key'],
                 (int) $validated['cash_received'],
+                $validated['customer_name'],
             );
-        } catch (InvalidArgumentException|LogicException $exception) {
+        } catch (InvalidArgumentException | LogicException $exception) {
             return back()->withErrors(['checkout' => $exception->getMessage()])->withInput();
         }
 
-        return redirect()->route('kasir.pos.receipt', $sale)->with('status', 'Transaksi berhasil disimpan.');
+        return redirect()->route('kasir.pos.receipt', $order)->with('status', 'Transaksi berhasil disimpan.');
     }
 
     public function history(Request $request): View
@@ -61,29 +65,29 @@ class PosController extends Controller
             'date' => ['nullable', 'date_format:Y-m-d'],
         ]);
 
-        $sales = Sale::query()
-            ->where('cashier_id', $request->user()->id)
-            ->when($filters['invoice'] ?? null, fn ($query, $invoice) => $query->where('invoice_number', 'like', '%' . $invoice . '%'))
-            ->when($filters['date'] ?? null, fn ($query, $date) => $query->whereDate('created_at', $date))
+        $orders = Order::query()
+            ->where('created_by', $request->user()->id)
+            ->when($filters['invoice'] ?? null, fn($query, $invoice) => $query->where('order_code', 'like', '%' . $invoice . '%'))
+            ->when($filters['date'] ?? null, fn($query, $date) => $query->whereDate('created_at', $date))
             ->latest('created_at')
             ->paginate(15)
             ->withQueryString();
 
-        return view('cashier.pos.history', compact('sales', 'filters'));
+        return view('cashier.pos.history', compact('orders', 'filters'));
     }
 
-    public function receipt(Request $request, Sale $sale): View
+    public function receipt(Request $request, Order $order): View
     {
-        abort_unless((int) $sale->cashier_id === (int) $request->user()->id, 404);
+        abort_unless((int) $order->created_by === (int) $request->user()->id, 404);
 
-        return view('cashier.pos.receipt', ['sale' => $sale->load('items')]);
+        return view('cashier.pos.receipt', ['order' => $order->load(['items', 'payment'])]);
     }
 
     public static function issueCheckoutToken(Request $request): string
     {
         $tokens = $request->session()->get('kasir.pos.checkout_tokens', []);
         $cutoff = now()->subDay()->timestamp;
-        $tokens = array_filter($tokens, fn ($entry) => is_array($entry) && ($entry['created_at'] ?? 0) >= $cutoff);
+        $tokens = array_filter($tokens, fn($entry) => is_array($entry) && ($entry['created_at'] ?? 0) >= $cutoff);
         $token = Str::random(64);
         $tokens[$token] = [
             'idempotency_key' => 'pos:' . Str::uuid(),
