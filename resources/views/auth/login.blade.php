@@ -3,14 +3,10 @@
     <main class="grid min-h-screen lg:grid-cols-2">
 
         {{-- PANEL BRANDING --}}
-        <section class="relative hidden overflow-hidden bg-primary p-12 lg:flex lg:flex-col lg:justify-between xl:p-16">
+        <section
+            class="relative hidden overflow-hidden bg-orange-500 p-12 lg:flex lg:flex-col lg:justify-between xl:p-16">
 
-            <div class="auth-pattern absolute inset-0"></div>
-
-            <div class="absolute -right-20 -top-20 h-72 w-72 rounded-full border-[40px] border-white/10"></div>
-
-            <div class="absolute -bottom-32 -left-20 h-96 w-96 rounded-full bg-primary-light/40 blur-2xl"></div>
-
+            <!-- Branding -->
             <div class="relative z-10">
                 <h2 class="text-lg font-semibold text-white">
                     Kantin Baraya
@@ -21,7 +17,8 @@
                 </p>
             </div>
 
-            <div class="relative z-10 max-w-lg py-12">
+            <!-- Konten utama -->
+            <div class="relative mb-65 z-10 max-w-lg py-12">
                 <h1 class="text-4xl font-semibold leading-tight tracking-tight text-white xl:text-5xl">
                     Momen makan enak, dimulai dari sini.
                 </h1>
@@ -34,14 +31,19 @@
                 <div class="mt-8 flex items-center gap-4">
                     <div class="flex -space-x-3">
                         <div
-                            class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary bg-orange-100">
-                            🍜</div>
+                            class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white/30 bg-orange-100">
+                            🍜
+                        </div>
+
                         <div
-                            class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary bg-amber-100">
-                            🍛</div>
+                            class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white/30 bg-amber-100">
+                            🍛
+                        </div>
+
                         <div
-                            class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary bg-red-100">
-                            🥤</div>
+                            class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white/30 bg-orange-50">
+                            🥤
+                        </div>
                     </div>
 
                     <p class="text-xs leading-5 text-white/80">
@@ -53,9 +55,6 @@
                 </div>
             </div>
 
-            <div class="relative z-10 text-xs text-white/60">
-                &copy; {{ date('Y') }} Kantin Baraya
-            </div>
         </section>
 
         {{-- FORM LOGIN --}}
@@ -64,7 +63,8 @@
 
                 {{-- LOGO MOBILE --}}
                 <div class="mb-10 flex items-center gap-3 lg:hidden">
-                    <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-white shadow-lg">
+                    <div
+                        class="flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-500 text-white shadow-lg">
                         <span class="text-xl font-bold">K</span>
                     </div>
 
@@ -137,7 +137,7 @@
                             </label>
 
                             <a href="{{ url('/forgot-password') }}" id="forgotLink"
-                                class="text-xs font-medium text-primary hover:text-primary-dark">
+                                class="text-xs font-medium text-orange-600 hover:text-orange-700">
                                 Lupa password?
                             </a>
                         </div>
@@ -175,7 +175,7 @@
                     <div class="flex items-center justify-between gap-3">
                         <label class="flex cursor-pointer items-center gap-2.5 text-sm text-typography-body">
                             <input type="checkbox" id="remember" name="remember" value="1"
-                                class="h-4 w-4 accent-primary">
+                                class="h-4 w-4 accent-orange-500">
                             Ingat saya
                         </label>
 
@@ -186,7 +186,7 @@
 
                     {{-- BUTTON LOGIN --}}
                     <button type="submit"
-                        class="group flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition duration-200 hover:-translate-y-0.5 hover:bg-primary-dark hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-primary/20 active:translate-y-0">
+                        class="group flex w-full items-center justify-center gap-2 rounded-2xl bg-orange-500 px-5 py-3.5 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 transition duration-200 hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-orange-400/30 active:translate-y-0">
                         Masuk
 
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -211,7 +211,7 @@
                     Belum punya akun?
 
                     <a href="{{ url('/register') }}" id="registerLink"
-                        class="font-semibold text-primary hover:text-primary-dark">
+                        class="font-semibold text-orange-600 hover:text-orange-700">
                         Daftar sekarang
                     </a>
                 </p>

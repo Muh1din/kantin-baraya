@@ -9,24 +9,26 @@ use Symfony\Component\HttpFoundation\Response;
 class RoleMiddleware
 {
     /**
-     * Memeriksa hak akses berdasarkan role pengguna.
+     * Role names used by older routes and newer seed data share the same
+     * permissions. Keep the route-level role checks while accepting both names.
      */
-    public function handle(
-        Request $request,
-        Closure $next,
-        string ...$roles
-    ): Response {
-        $user = $request->user();
+    private const ROLE_ALIASES = [
+        'pemilik' => 'owner',
+        'kasir' => 'cashier',
+        'pelanggan' => 'customer',
+        'koki' => 'chef',
+    ];
 
-        // Pastikan pengguna sudah login.
-        if (! $user) {
-            return redirect()->route('login');
-        }
+    public function handle(Request $request, Closure $next, string ...$roles): Response
+    {
+        $userRole = $request->user()?->role?->name;
+        $userRole = self::ROLE_ALIASES[$userRole] ?? $userRole;
+        $allowedRoles = array_map(
+            static fn (string $role): string => self::ROLE_ALIASES[$role] ?? $role,
+            $roles,
+        );
 
-        // Pastikan role pengguna sesuai dengan izin route.
-        if (! in_array($user->role?->name, $roles, true)) {
-            abort(403, 'Anda tidak memiliki izin untuk mengakses halaman ini.');
-        }
+        abort_unless($userRole !== null && in_array($userRole, $allowedRoles, true), 403);
 
         return $next($request);
     }
