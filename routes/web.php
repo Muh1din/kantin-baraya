@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Cashier\OrderController;
+use App\Http\Controllers\Cashier\CashierDashboardController;
+use App\Http\Controllers\Guest\GuestOrderController;
 use App\Http\Controllers\Owner\TableController;
 use App\Http\Controllers\Owner\ReportController;
 use App\Http\Controllers\Home\HomeController;
@@ -36,16 +39,53 @@ Route::post('/logout', [AuthController::class, 'destroy'])
     ->name('logout');
 
 Route::middleware(['auth', 'role:owner'])->get('/owner/dashboard', [DashboardController::class, 'index'])->name('owner.dashboard');
-Route::middleware(['auth', 'role:kasir'])->get('/kasir/dashboard', [DashboardController::class, 'index'])->name('kasir.dashboard');
+Route::middleware(['auth', 'role:cashier'])->get('/cashier/dashboard', [CashierDashboardController::class, 'index'])->name('cashier.dashboard');
 Route::middleware(['auth', 'role:pelanggan'])->get('/pelanggan/dashboard', [DashboardController::class, 'index'])->name('pelanggan.dashboard');
 Route::middleware(['auth', 'role:koki'])->get('/koki/dashboard', [DashboardController::class, 'index'])->name('koki.dashboard');
 
-// Route::prefix('kasir/pos')->name('kasir.pos.')->middleware(['auth', 'role:kasir'])->group(function () {
-//     Route::get('/', [PosController::class, 'index'])->name('index');
-//     Route::get('/history', [PosController::class, 'history'])->name('history');
-//     Route::post('/checkout', [PosController::class, 'checkout'])->name('checkout');
-//     Route::get('/sales/{sale}', [PosController::class, 'receipt'])->name('receipt');
-// });
+Route::prefix('kasir/pos')->name('kasir.pos.')->middleware(['auth', 'role:kasir'])->group(function () {
+    Route::get('/', [PosController::class, 'index'])->name('index');
+    Route::get('/history', [PosController::class, 'history'])->name('history');
+    Route::post('/checkout', [PosController::class, 'checkout'])->name('checkout');
+    Route::get('/orders/{order}', [PosController::class, 'receipt'])->name('receipt');
+});
+
+Route::prefix('kasir/orders')
+    ->name('kasir.orders.')
+    ->middleware(['auth', 'role:kasir'])
+    ->group(function () {
+        Route::get('/', [OrderController::class, 'index'])
+            ->name('index');
+
+        Route::get('/{order}', [OrderController::class, 'show'])
+            ->whereNumber('order')
+            ->name('show');
+
+        Route::post('/{order}/confirm', [OrderController::class, 'confirm'])
+            ->whereNumber('order')
+            ->name('confirm');
+
+        Route::post('/{order}/reject', [OrderController::class, 'reject'])
+            ->whereNumber('order')
+            ->name('reject');
+
+        Route::post('/{order}/payments/{payment}/verify', [
+            OrderController::class,
+            'verifyPayment',
+        ])
+            ->whereNumber('order')
+            ->whereNumber('payment')
+            ->name('payments.verify');
+
+       
+    });
+
+// Guest
+Route::post('/guest/orders', [GuestOrderController::class, 'store'])
+    ->name('guest.orders.store');
+
+Route::post('/guest/orders/{token}/payment-proof', [GuestOrderController::class, 'uploadPaymentProof'])
+    ->name('guest.orders.payment-proof');
 
 // Route::prefix('customer')
 //     ->name('customer.')

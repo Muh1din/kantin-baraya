@@ -1,5 +1,7 @@
 const CART_STORAGE_KEY = "kantin-baraya-cart-v1";
 
+let currentOrderToken = null;
+
 function initializeCart() {
     // ========================================
     // 1. ELEMEN KERANJANG
@@ -501,39 +503,97 @@ function initializeCart() {
     });
 
     // ========================================
-    // 12. SUBMIT CHECKOUT SEMENTARA
+    // 12. SUBMIT CHECKOUT KE BACKEND
     // ========================================
-    checkoutForm?.addEventListener("submit", (event) => {
+    checkoutForm?.addEventListener("submit", async (event) => {
         event.preventDefault();
+
+        const entries = Object.entries(cart);
+
+        if (entries.length === 0) {
+            alert("Keranjang masih kosong.");
+            return;
+        }
 
         const selectedPayment =
             orderMode.value === "preorder" ? "qris" : paymentMethod.value;
 
-        if (selectedPayment === "qris") {
-            openQrisModal();
+        const formData = new FormData(checkoutForm);
+
+        formData.set("payment_method", selectedPayment);
+
+        const items = entries.map(([id, item]) => ({
+            id: Number(id),
+            quantity: Number(item.quantity),
+        }));
+
+        const csrfToken = document.querySelector(
+            'meta[name="csrf-token"]',
+        )?.content;
+
+        if (!csrfToken) {
+            alert("Token keamanan tidak ditemukan. Muat ulang halaman.");
             return;
         }
 
-        // Pastikan preorder tetap menggunakan QRIS.
-        if (orderMode?.value === "preorder" && paymentMethod) {
-            paymentMethod.value = "qris";
+        const submitButton = checkoutForm.querySelector('[type="submit"]');
+
+        if (submitButton) {
+            submitButton.disabled = true;
         }
 
-        const entries = Object.values(cart);
+        try {
+            const response = await fetch("/guest/orders", {
+                method: "POST",
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": csrfToken,
+                },
+                body: JSON.stringify({
+                    customer_name: formData.get("customer_name"),
+                    customer_phone: formData.get("customer_phone"),
+                    order_type: formData.get("order_type"),
+                    payment_method: selectedPayment,
+                    notes: formData.get("notes"),
+                    items,
+                }),
+            });
 
-        if (entries.length === 0) {
-            alert("Keranjang masih kosong.");
-            closeCheckoutModal();
-            return;
+            const result = await response.json();
+
+            if (!response.ok) {
+                const message = result.errors
+                    ? Object.values(result.errors).flat().join("\n")
+                    : result.message || "Checkout gagal.";
+
+                alert(message);
+                return;
+            }
+
+            currentOrderToken = result.tracking_token;
+
+            if (selectedPayment === "qris") {
+                qrisTotal.textContent = checkoutTotal.textContent;
+                openQrisModal();
+            } else {
+                alert(
+                    `Pesanan berhasil dibuat!\nKode pesanan: ${result.order_code}\nTotal: Rp${Number(result.total_amount).toLocaleString("id-ID")}`,
+                );
+
+                cart = {};
+                persistCart();
+                renderCart();
+                closeCheckoutModal();
+            }
+        } catch (error) {
+            console.error("Checkout error:", error);
+            alert("Tidak dapat menghubungi server. Silakan coba lagi.");
+        } finally {
+            if (submitButton) {
+                submitButton.disabled = false;
+            }
         }
-
-        // Tahap ini masih simulasi.
-        // Belum mengirim data ke backend atau database.
-        alert(
-            "Form checkout berhasil divalidasi. Proses pemesanan belum terhubung ke server.",
-        );
-
-        closeCheckoutModal();
     });
 
     // ========================================
@@ -673,6 +733,211 @@ function initializeCart() {
         }
     });
 
+    // Modal Qris
+    function openQrisModal() {
+        qrisTotal.textContent = checkoutTotal.textContent;
+
+        checkoutOverlay.classList.add("hidden");
+        checkoutOverlay.classList.remove("flex");
+
+        qrisOverlay.classList.remove("hidden");
+        qrisOverlay.classList.add("flex");
+        qrisOverlay.setAttribute("aria-hidden", "false");
+    }
+
+    function closeQrisModal() {
+        qrisOverlay.classList.add("hidden");
+        qrisOverlay.classList.remove("flex");
+        qrisOverlay.setAttribute("aria-hidden", "true");
+    }
+
+    closeQris.addEventListener("click", closeQrisModal);
+
+    backToCheckout.addEventListener("click", () => {
+        closeQrisModal();
+
+        checkoutOverlay.classList.remove("hidden");
+        checkoutOverlay.classList.add("flex");
+    });
+
+    // Validasi Bukti pembayaran
+    if (paymentProof) {
+        paymentProof.addEventListener("change", () => {
+            const file = paymentProof.files[0];
+
+            if (confirmQrisPayment) {
+                confirmQrisPayment.disabled = true;
+            }
+
+            if (!file) {
+                if (paymentProofInfo) {
+                    paymentProofInfo.textContent =
+                        "Format JPG, PNG, atau WebP. Maksimal 5 MB.";
+                }
+                return;
+            }
+
+            const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+            if (!allowedTypes.includes(file.type)) {
+                paymentProof.value = "";
+
+                if (paymentProofInfo) {
+                    paymentProofInfo.textContent =
+                        "Format file harus JPG, PNG, atau WebP.";
+                }
+
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                paymentProof.value = "";
+
+                if (paymentProofInfo) {
+                    paymentProofInfo.textContent = "Ukuran file maksimal 5 MB.";
+                }
+
+                return;
+            }
+
+            if (paymentProofInfo) {
+                paymentProofInfo.textContent = `File dipilih: ${file.name}`;
+            }
+
+            if (confirmQrisPayment) {
+                confirmQrisPayment.disabled = false;
+            }
+        });
+    }
+
+    // if (confirmQrisPayment) {
+    confirmQrisPayment.addEventListener("click", async () => {
+        const file = paymentProof?.files[0];
+
+        if (!currentOrderToken) {
+            alert("Pesanan belum dibuat. Silakan checkout kembali.");
+            return;
+        }
+
+        if (!file) {
+            alert("Pilih bukti pembayaran terlebih dahulu.");
+            return;
+        }
+
+        const csrfToken = document.querySelector(
+            'meta[name="csrf-token"]',
+        )?.content;
+
+        if (!csrfToken) {
+            alert("Token keamanan tidak ditemukan. Muat ulang halaman.");
+            return;
+        }
+
+        const data = new FormData();
+        data.append("payment_proof", file);
+
+        confirmQrisPayment.disabled = true;
+
+        try {
+            const response = await fetch(
+                `/guest/orders/${encodeURIComponent(currentOrderToken)}/payment-proof`,
+                {
+                    method: "POST",
+                    headers: {
+                        Accept: "application/json",
+                        "X-CSRF-TOKEN": csrfToken,
+                    },
+                    body: data,
+                },
+            );
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                alert(result.message || "Upload bukti pembayaran gagal.");
+                return;
+            }
+
+            alert(`${result.message}\nKode pesanan: ${result.order_code}`);
+
+            closeQrisModal();
+            closeCheckoutModal();
+
+            currentOrderToken = null;
+            paymentProof.value = "";
+
+            if (paymentProofInfo) {
+                paymentProofInfo.textContent =
+                    "Format JPG, PNG, atau WebP. Maksimal 5 MB.";
+            }
+
+            cart = {};
+            persistCart();
+            renderCart();
+        } catch (error) {
+            console.error("Upload bukti pembayaran error:", error);
+            alert("Upload gagal karena masalah koneksi. Silakan coba lagi.");
+        } finally {
+            confirmQrisPayment.disabled = false;
+        }
+    });
+
+    function updateQrisImage() {
+        const imageUrl = qrisImage?.getAttribute("src");
+        const isConfigured =
+            Boolean(imageUrl) && qrisImage.complete && qrisImage.naturalWidth > 0;
+
+        qrisImage?.classList.toggle("hidden", !isConfigured);
+        qrisPlaceholder?.classList.toggle("hidden", isConfigured);
+
+        if (downloadQris) {
+            downloadQris.disabled = !isConfigured;
+        }
+
+        if (qrisImageInfo) {
+            qrisImageInfo.textContent = isConfigured
+                ? "Simpan gambar QRIS untuk memudahkan pembayaran."
+                : "QRIS dapat diunduh setelah Owner mengatur gambar pembayaran.";
+        }
+    }
+
+    updateQrisImage();
+
+    qrisImage?.addEventListener("load", updateQrisImage);
+    qrisImage?.addEventListener("error", updateQrisImage);
+
+    downloadQris?.addEventListener("click", async () => {
+        const imageUrl = qrisImage?.getAttribute("src");
+
+        if (!imageUrl || !qrisImage?.naturalWidth) {
+            alert("Gambar QRIS belum tersedia.");
+            return;
+        }
+
+        try {
+            const response = await fetch(qrisImage.src);
+
+            if (!response.ok) {
+                throw new Error("Gambar QRIS gagal diunduh.");
+            }
+
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+            link.href = blobUrl;
+            link.download = "qris-kantin-baraya.png";
+
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+        } catch (error) {
+            console.error("Download QRIS gagal:", error);
+            alert("QRIS gagal diunduh. Silakan coba lagi.");
+        }
+    });
     // ========================================
     // 16. INISIALISASI AWAL
     // ========================================
@@ -680,9 +945,7 @@ function initializeCart() {
     renderCart();
 }
 
-// ========================================
-// JALANKAN SETELAH DOM SIAP
-// ========================================
+// jalankan setelah DOM siap
 if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initializeCart, {
         once: true,
@@ -690,151 +953,3 @@ if (document.readyState === "loading") {
 } else {
     initializeCart();
 }
-
-// Modal Qris
-function openQrisModal() {
-    qrisTotal.textContent = checkoutTotal.textContent;
-
-    checkoutOverlay.classList.add("hidden");
-    checkoutOverlay.classList.remove("flex");
-
-    qrisOverlay.classList.remove("hidden");
-    qrisOverlay.classList.add("flex");
-    qrisOverlay.setAttribute("aria-hidden", "false");
-}
-
-function closeQrisModal() {
-    qrisOverlay.classList.add("hidden");
-    qrisOverlay.classList.remove("flex");
-    qrisOverlay.setAttribute("aria-hidden", "true");
-}
-
-closeQris.addEventListener("click", closeQrisModal);
-
-backToCheckout.addEventListener("click", () => {
-    closeQrisModal();
-
-    checkoutOverlay.classList.remove("hidden");
-    checkoutOverlay.classList.add("flex");
-});
-
-// Validasi Bukti pembayaran
-if (paymentProof) {
-    paymentProof.addEventListener("change", () => {
-        const file = paymentProof.files[0];
-
-        if (confirmQrisPayment) {
-            confirmQrisPayment.disabled = true;
-        }
-
-        if (!file) {
-            if (paymentProofInfo) {
-                paymentProofInfo.textContent =
-                    "Format JPG, PNG, atau WebP. Maksimal 5 MB.";
-            }
-            return;
-        }
-
-        const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-
-        if (!allowedTypes.includes(file.type)) {
-            paymentProof.value = "";
-
-            if (paymentProofInfo) {
-                paymentProofInfo.textContent = "Format file harus JPG, PNG, atau WebP.";
-            }
-
-            return;
-        }
-
-        if (file.size > 5 * 1024 * 1024) {
-            paymentProof.value = "";
-
-            if (paymentProofInfo) {
-                paymentProofInfo.textContent = "Ukuran file maksimal 5 MB.";
-            }
-
-            return;
-        }
-
-        if (paymentProofInfo) {
-            paymentProofInfo.textContent = `File dipilih: ${file.name}`;
-        }
-
-        if (confirmQrisPayment) {
-            confirmQrisPayment.disabled = false;
-        }
-    });
-}
-
-// Konfirmasi Pembayaran
-if (confirmQrisPayment) {
-    confirmQrisPayment.addEventListener("click", () => {
-        alert("Konfirmasi pembayaran sedang diproses.");
-        // TODO: Implementasikan logika pengiriman data ke server di sini.
-        closeQrisModal();
-        closeCheckoutModal();
-        // Bersihkan keranjang setelah sukses.
-        cart = {};
-        persistCart();
-        renderCart();
-    });
-}
-    const imageUrl = qrisImage?.getAttribute("src");
-
-    const isConfigured =
-        Boolean(imageUrl) && qrisImage.complete && qrisImage.naturalWidth > 0;
-
-    qrisImage?.classList.toggle("hidden", !isConfigured);
-    qrisPlaceholder?.classList.toggle("hidden", isConfigured);
-
-    if (downloadQris) {
-        downloadQris.disabled = !isConfigured;
-    }
-
-    if (qrisImageInfo) {
-        qrisImageInfo.textContent = isConfigured
-            ? "Simpan gambar QRIS untuk memudahkan pembayaran."
-            : "QRIS dapat diunduh setelah Owner mengatur gambar pembayaran.";
-    }
-
-
-qrisImage?.addEventListener("load", updateQrisImage);
-
-qrisImage?.addEventListener("error", updateQrisImage);
-
-downloadQris?.addEventListener("click", async () => {
-    const imageUrl = qrisImage?.getAttribute("src");
-
-    if (!imageUrl || !qrisImage?.naturalWidth) {
-        alert("Gambar QRIS belum tersedia.");
-        return;
-    }
-
-    try {
-        const response = await fetch(qrisImage.src);
-
-        if (!response.ok) {
-            throw new Error("Gambar QRIS gagal diunduh.");
-        }
-
-        const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
-
-        const link = document.createElement("a");
-        link.href = blobUrl;
-        link.download = "qris-kantin-baraya.png";
-
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-    } catch (error) {
-        console.error("Download QRIS gagal:", error);
-        alert("QRIS gagal diunduh. Silakan coba lagi.");
-    }
-});
-
-// Periksa kondisi awal gambar QRIS.
-updateQrisImage();
