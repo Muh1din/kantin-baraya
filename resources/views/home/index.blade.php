@@ -109,18 +109,16 @@
                             class="product-card flex h-[410px] min-w-0 flex-col overflow-hidden rounded-2xl border border-stone-100 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-orange-200 hover:shadow-lg sm:rounded-3xl"
                             data-product-id="{{ $menu->id }}"
                             data-category="{{ \Illuminate\Support\Str::slug($category) }}"
-                            data-menu-name="{{ $menu->name }}"
-                            data-price="{{ $menu->price }}"
-                            data-image="{{ $image }}"
-                            data-stock="{{ $menu->stock }}">
-                            
+                            data-menu-name="{{ $menu->name }}" data-price="{{ $menu->price }}"
+                            data-image="{{ $image }}" data-stock="{{ $menu->stock }}">
+
                             {{-- THUMBNAIL --}}
                             <button type="button" data-action="detail" data-id="{{ $menu->id }}"
                                 class="relative block h-44 w-full shrink-0 overflow-hidden bg-stone-100 text-left">
                                 @if ($image)
                                     <img src="{{ $image }}" alt="{{ $menu->name }}" loading="lazy"
                                         class="h-full w-full object-cover transition duration-300 hover:scale-105"
-                                        onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('grid','place-items-center');this.insertAdjacentHTML('beforeend','<span class=&quot;text-5xl&quot;>🍽️</span>')">
+                                        onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('grid','place-items-center');this.insertAdjacentHTML('beforeend','<span class="text-5xl">🍽️</span>')">
                                 @else
                                     <div class="grid h-full w-full place-items-center bg-stone-100">
                                         <span class="text-5xl">🍽️</span>
@@ -140,7 +138,6 @@
                                     </span>
                                 @endif
 
-                                
                             </button>
 
                             {{-- CONTENT BODY --}}
@@ -190,4 +187,6 @@
             @endif
         </div>
     </section>
+
+    <x-home.card-drawer />
 </x-layouts.home>
