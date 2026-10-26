@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Cashier\OrderController;
+use App\Http\Controllers\Chef\ChefDashboardController;
+use App\Http\Controllers\Chef\OrderController as ChefOrderController;
 use App\Http\Controllers\Cashier\CashierDashboardController;
 use App\Http\Controllers\Guest\GuestOrderController;
 use App\Http\Controllers\Owner\TableController;
@@ -43,6 +45,25 @@ Route::middleware(['auth', 'role:cashier'])->get('/cashier/dashboard', [CashierD
 Route::middleware(['auth', 'role:pelanggan'])->get('/pelanggan/dashboard', [DashboardController::class, 'index'])->name('pelanggan.dashboard');
 Route::middleware(['auth', 'role:koki'])->get('/koki/dashboard', [DashboardController::class, 'index'])->name('koki.dashboard');
 
+// KOKI (CHEF)
+Route::prefix('chef')
+    ->name('chef.')
+    ->middleware(['auth', 'role:koki'])
+    ->group(function () {
+        Route::get('/dashboard', [ChefDashboardController::class, 'index'])
+            ->name('dashboard');
+
+        Route::post('/orders/{order}/start', [ChefDashboardController::class, 'startCooking'])
+            ->name('orders.start');
+
+        Route::post('/orders/{order}/complete', [ChefDashboardController::class, 'complete'])
+            ->name('orders.complete');
+
+        Route::get('/orders/check-new', [ChefDashboardController::class, 'checkNewOrders'])
+            ->name('orders.check-new');
+    });
+
+
 Route::prefix('kasir/pos')->name('kasir.pos.')->middleware(['auth', 'role:kasir'])->group(function () {
     Route::get('/', [PosController::class, 'index'])->name('index');
     Route::get('/history', [PosController::class, 'history'])->name('history');
@@ -76,8 +97,6 @@ Route::prefix('kasir/orders')
             ->whereNumber('order')
             ->whereNumber('payment')
             ->name('payments.verify');
-
-       
     });
 
 // Guest

@@ -8,6 +8,7 @@ export default defineConfig({
             input: [
                 "resources/css/app.css",
                 "resources/js/app.js",
+                "resources/js/chef/notifikasi.js",
                 "resources/js/home/filter-menu.js",
                 "resources/js/home/card.js",
             ],
