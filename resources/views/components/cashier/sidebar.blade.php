@@ -30,9 +30,7 @@
                    px-5 py-5
                    lg:shrink-0 lg:px-7 lg:py-7">
             {{-- BRAND --}}
-            <a 
-            {{-- href="{{ route('kasir.dashboard') }}" --}}
-             class="flex min-w-0 items-center gap-3">
+            <a {{-- href="{{ route('kasir.dashboard') }}" --}} class="flex min-w-0 items-center gap-3">
                 <div
                     class="grid h-11 w-11 shrink-0 place-items-center
                            rounded-2xl bg-orange-500 text-lg
@@ -112,9 +110,7 @@
                    lg:px-4 lg:pt-4 lg:opacity-100
                    lg:shadow-none">
             {{-- DASHBOARD --}}
-            <a 
-            {{-- href="{{ route('kasir.dashboard') }}"  --}}
-            @class([
+            <a {{-- href="{{ route('kasir.dashboard') }}"  --}} @class([
                 'flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm lg:w-full',
                 'bg-orange-50 font-bold text-orange-700' => request()->routeIs(
                     'kasir.dashboard'),
@@ -148,8 +144,7 @@
             </a>
 
             {{-- KASIR / POS --}}
-            <a 
-            {{-- href="{{ \Illuminate\Support\Facades\Route::has('kasir.pos.index') ? route('kasir.pos.index') : '#' }}" --}}
+            <a href="{{ \Illuminate\Support\Facades\Route::has('kasir.pos.index') ? route('kasir.pos.index') : '#' }}"
                 @class([
                     'flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm lg:w-full',
                     'bg-orange-50 font-bold text-orange-700' => request()->routeIs(
@@ -169,15 +164,14 @@
             </div>
 
             {{-- RIWAYAT TRANSAKSI --}}
-            <a 
-            {{-- href="{{ \Illuminate\Support\Facades\Route::has('kasir.pos.history') ? route('kasir.pos.history') : '#' }}" --}}
-                @class([
-                    'flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm lg:w-full',
-                    'bg-orange-50 font-bold text-orange-700' => request()->routeIs(
-                        'kasir.pos.history'),
-                    'font-semibold text-stone-600 transition hover:bg-stone-50 hover:text-orange-700' => !request()->routeIs(
-                        'kasir.pos.history'),
-                ]) @if (request()->routeIs('kasir.pos.history')) aria-current="page" @endif
+            <a {{-- href="{{ \Illuminate\Support\Facades\Route::has('kasir.pos.history') ? route('kasir.pos.history') : '#' }}" --}} @class([
+                'flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm lg:w-full',
+                'bg-orange-50 font-bold text-orange-700' => request()->routeIs(
+                    'kasir.pos.history'),
+                'font-semibold text-stone-600 transition hover:bg-stone-50 hover:text-orange-700' => !request()->routeIs(
+                    'kasir.pos.history'),
+            ])
+                @if (request()->routeIs('kasir.pos.history')) aria-current="page" @endif
                 @click="mobileNavOpen = false; userProfileOpen = false">
                 <span class="text-lg" aria-hidden="true">▥</span>
                 Riwayat Transaksi

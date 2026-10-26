@@ -2,7 +2,7 @@
     <main class="min-h-screen bg-orange-50/60 px-4 py-8 sm:px-6">
         <div class="mx-auto max-w-7xl">
             <header class="flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-gradient-to-br from-orange-500 via-orange-500 to-amber-400 p-6 text-white shadow-lg">
-                <div><p class="text-sm font-semibold text-white/80">Kantin Baraya</p><h1 class="mt-1 text-3xl font-black">POS Kasir</h1><p class="mt-1 text-sm">Pilih menu, atur jumlah, lalu terima pembayaran tunai.</p></div>
+                <div><p class="text-sm font-semibold text-white/80">Kantin Baraya</p><h1 class="mt-1 text-3xl font-black">POS Kasir</h1><p class="mt-1 text-sm">Buat pesanan langsung dan catat pembayarannya.</p></div>
                 <div class="flex flex-wrap items-center gap-3">@include('cashier.pos._navigation')<form action="{{ route('logout') }}" method="POST">@csrf<button class="rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-orange-700">Keluar</button></form></div>
             </header>
 
@@ -32,15 +32,29 @@
                     <form id="checkout-form" class="mt-5" method="POST" action="{{ route('kasir.pos.checkout') }}">
                         @csrf
                         <input type="hidden" name="checkout_token" value="{{ $checkoutToken }}">
+                        <label class="mt-4 block text-sm font-bold text-stone-700">Nama pelanggan
+                            <input name="customer_name" value="{{ old('customer_name') }}" maxlength="255" required class="mt-2 w-full rounded-xl border border-stone-200 px-4 py-3">
+                        </label>
+                        <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                            <label class="text-sm font-bold text-stone-700">Jenis pesanan
+                                <select id="order_type" name="order_type" class="mt-2 w-full rounded-xl border border-stone-200 px-4 py-3"><option value="makan_di_tempat">Makan di tempat</option><option value="bungkus">Bungkus</option></select>
+                            </label>
+                            <label class="text-sm font-bold text-stone-700">Waktu pembayaran
+                                <select id="payment_timing" name="payment_timing" class="mt-2 w-full rounded-xl border border-stone-200 px-4 py-3"><option value="now">Bayar sekarang</option><option value="after_meal">Bayar setelah makan</option></select>
+                            </label>
+                        </div>
+                        <label class="mt-4 block text-sm font-bold text-stone-700">Metode pembayaran
+                            <select id="payment_method" name="payment_method" class="mt-2 w-full rounded-xl border border-stone-200 px-4 py-3"><option value="cash">Tunai</option><option value="qris">QRIS (menunggu verifikasi kasir)</option></select>
+                        </label>
                         <div id="cart-items" class="max-h-[42vh] space-y-3 overflow-y-auto"></div>
                         <p id="empty-cart" class="rounded-xl bg-stone-50 p-5 text-sm text-stone-600">Keranjang masih kosong.</p>
                         <div id="cart-hidden-fields"></div>
                         <div class="mt-5 border-t border-stone-200 pt-4">
                             <div class="flex justify-between text-lg font-extrabold"><span>Total</span><span id="cart-total">Rp 0</span></div>
-                            <label for="cash_received" class="mt-5 block text-sm font-bold text-stone-700">Uang diterima (Rp)</label>
+                            <label id="cash-label" for="cash_received" class="mt-5 block text-sm font-bold text-stone-700">Uang diterima (Rp)</label>
                             <input id="cash_received" name="cash_received" type="number" min="0" step="1" inputmode="numeric" placeholder="Contoh: 50000" value="{{ old('cash_received') }}" class="mt-2 w-full rounded-xl border border-stone-200 px-4 py-3" required>
                             <div class="mt-3 flex justify-between text-sm"><span class="text-stone-600">Perkiraan kembalian</span><span id="change-estimate" class="font-bold">Rp 0</span></div>
-                            <button id="checkout-button" type="submit" disabled class="mt-5 w-full rounded-xl bg-orange-500 px-5 py-3.5 font-extrabold text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-stone-300">Checkout tunai</button>
+                            <button id="checkout-button" type="submit" disabled class="mt-5 w-full rounded-xl bg-orange-500 px-5 py-3.5 font-extrabold text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-stone-300">Buat Pesanan</button>
                         </div>
                     </form>
                 </section>
@@ -55,6 +69,20 @@
             const hiddenFields = document.getElementById('cart-hidden-fields');
             const cashInput = document.getElementById('cash_received');
             const totalElement = document.getElementById('cart-total');
+            const paymentMethod = document.getElementById('payment_method');
+            const paymentTiming = document.getElementById('payment_timing');
+            const orderType = document.getElementById('order_type');
+            const checkoutButton = document.getElementById('checkout-button');
+            const syncPaymentInputs = () => {
+                const cashNow = paymentMethod.value === 'cash' && paymentTiming.value === 'now';
+                cashInput.required = cashNow;
+                cashInput.disabled = !cashNow;
+                document.getElementById('cash-label').classList.toggle('hidden', !cashNow);
+                document.getElementById('change-estimate').parentElement.classList.toggle('hidden', !cashNow);
+                checkoutButton.textContent = paymentMethod.value === 'qris' ? 'Buat Pesanan QRIS' : (paymentTiming.value === 'after_meal' ? 'Buat Pesanan, Bayar Nanti' : 'Checkout Tunai');
+                if (paymentTiming.value === 'after_meal') orderType.value = 'makan_di_tempat';
+                orderType.querySelector('option[value="bungkus"]').disabled = paymentTiming.value === 'after_meal';
+            };
             const render = () => {
                 cartItems.replaceChildren(); hiddenFields.replaceChildren();
                 let total = 0; let index = 0;
@@ -93,12 +121,14 @@
                 document.querySelectorAll('.menu-card').forEach(card => { const matches = card.dataset.search.includes(query); card.classList.toggle('hidden', !matches); if (matches) visible++; });
                 document.getElementById('no-results').classList.toggle('hidden', visible > 0);
             });
-            cashInput.addEventListener('input', render);
+            cashInput.addEventListener('input', () => { cashInput.setCustomValidity(''); render(); });
             document.getElementById('checkout-form').addEventListener('submit', event => {
                 const total = [...cart.values()].reduce((sum, item) => sum + item.price * item.quantity, 0);
-                if (cart.size === 0 || !Number.isSafeInteger(Number(cashInput.value)) || Number(cashInput.value) < total) { event.preventDefault(); cashInput.setCustomValidity('Masukkan uang yang cukup untuk membayar total transaksi.'); cashInput.reportValidity(); }
+                if (cart.size === 0 || (cashInput.required && (!Number.isSafeInteger(Number(cashInput.value)) || Number(cashInput.value) < total))) { event.preventDefault(); cashInput.setCustomValidity('Masukkan uang yang cukup untuk membayar total transaksi.'); cashInput.reportValidity(); }
                 else cashInput.setCustomValidity('');
             });
+            [paymentMethod, paymentTiming, orderType].forEach(input => input.addEventListener('change', syncPaymentInputs));
+            syncPaymentInputs();
             render();
         })();
     </script>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller
@@ -13,6 +14,29 @@ class ReportController extends Controller
     public function index()
     {
         return view('owner.report.index');
+    }
+
+    public function sales(Request $request)
+    {
+        $filters = $request->validate([
+            'from' => ['nullable', 'date_format:Y-m-d'],
+            'to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:from'],
+        ]);
+
+        $orders = Order::query()
+            ->with('payment')
+            ->whereHas('payment', fn ($query) => $query->where('payment_status', 'paid'))
+            ->when($filters['from'] ?? null, fn ($query, $date) => $query->whereDate('created_at', '>=', $date))
+            ->when($filters['to'] ?? null, fn ($query, $date) => $query->whereDate('created_at', '<=', $date))
+            ->latest()
+            ->get();
+
+        return view('owner.report.sales', [
+            'orders' => $orders,
+            'filters' => $filters,
+            'transactionCount' => $orders->count(),
+            'salesTotal' => $orders->sum(fn (Order $order) => (float) $order->total_amount),
+        ]);
     }
 
     /**

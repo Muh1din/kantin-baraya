@@ -14,6 +14,7 @@ use App\Http\Controllers\Owner\IngredientController;
 use App\Http\Controllers\Owner\IngredientStockMovementController;
 use App\Http\Controllers\Owner\RecipeController;
 use App\Http\Controllers\Cashier\PosController;
+use App\Http\Controllers\Chef\ChefDashboardController;
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Customer\MenuCatalog;
 use App\Http\Controllers\Customer\MenuCatalogController;
@@ -41,13 +42,19 @@ Route::post('/logout', [AuthController::class, 'destroy'])
 Route::middleware(['auth', 'role:owner'])->get('/owner/dashboard', [DashboardController::class, 'index'])->name('owner.dashboard');
 Route::middleware(['auth', 'role:cashier'])->get('/cashier/dashboard', [CashierDashboardController::class, 'index'])->name('cashier.dashboard');
 Route::middleware(['auth', 'role:pelanggan'])->get('/pelanggan/dashboard', [DashboardController::class, 'index'])->name('pelanggan.dashboard');
-Route::middleware(['auth', 'role:koki'])->get('/koki/dashboard', [DashboardController::class, 'index'])->name('koki.dashboard');
+Route::middleware(['auth', 'role:koki'])->get('/koki/dashboard', [ChefDashboardController::class, 'index'])->name('koki.dashboard');
+Route::middleware(['auth', 'role:koki'])->get('/chef/dashboard', [ChefDashboardController::class, 'index'])->name('chef.dashboard');
+Route::prefix('chef/orders')->name('chef.orders.')->middleware(['auth', 'role:koki'])->group(function () {
+    Route::post('/{order}/start', [ChefDashboardController::class, 'startCooking'])->whereNumber('order')->name('start');
+    Route::post('/{order}/complete', [ChefDashboardController::class, 'complete'])->whereNumber('order')->name('complete');
+});
 
 Route::prefix('kasir/pos')->name('kasir.pos.')->middleware(['auth', 'role:kasir'])->group(function () {
     Route::get('/', [PosController::class, 'index'])->name('index');
     Route::get('/history', [PosController::class, 'history'])->name('history');
     Route::post('/checkout', [PosController::class, 'checkout'])->name('checkout');
     Route::get('/orders/{order}', [PosController::class, 'receipt'])->name('receipt');
+    Route::post('/orders/{order}/settle', [PosController::class, 'settle'])->name('settle');
 });
 
 Route::prefix('kasir/orders')
@@ -76,8 +83,6 @@ Route::prefix('kasir/orders')
             ->whereNumber('order')
             ->whereNumber('payment')
             ->name('payments.verify');
-
-       
     });
 
 // Guest

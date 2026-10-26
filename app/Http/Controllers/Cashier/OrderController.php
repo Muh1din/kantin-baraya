@@ -88,6 +88,12 @@ class OrderController extends Controller
                 ]);
             }
 
+            if ($order->payment()->where('payment_method', 'qris')->where('payment_status', 'pending')->exists()) {
+                throw ValidationException::withMessages([
+                    'payment' => 'Verifikasi pembayaran QRIS terlebih dahulu sebelum mengirim pesanan ke dapur.',
+                ]);
+            }
+
             $items = $order->items()->get();
 
             if ($items->isEmpty()) {
@@ -182,11 +188,9 @@ class OrderController extends Controller
             ->with('success', 'Pesanan berhasil ditolak.');
     }
 
-    public function verifyPayment(
-        int $order,
-        int $payment
-    ): RedirectResponse {
-        DB::transaction(function () use ($order, $payment) {
+    public function verifyPayment(Request $request, int $order, int $payment): RedirectResponse
+    {
+        DB::transaction(function () use ($request, $order, $payment) {
             $orderRecord = Order::query()
                 ->where('order_channel', 'online')
                 ->lockForUpdate()
@@ -229,7 +233,18 @@ class OrderController extends Controller
                 ]);
             }
 
-            $paymentRecord->update([
+            $cashDetails = [];
+            if ($paymentRecord->payment_method === 'tunai') {
+                $cashReceived = $request->validate([
+                    'cash_received' => ['required', 'integer', 'min:' . (int) $paymentRecord->amount],
+                ])['cash_received'];
+                $cashDetails = [
+                    'cash_received' => $cashReceived,
+                    'change_due' => $cashReceived - (int) $paymentRecord->amount,
+                ];
+            }
+
+            $paymentRecord->update($cashDetails + [
                 'payment_status' => 'paid',
                 'paid_at' => now(),
             ]);

@@ -239,6 +239,12 @@
                                             onsubmit="return confirm('Pastikan pembayaran benar-benar sudah diterima. Lanjutkan verifikasi?')">
                                             @csrf
 
+                                            @if (strtolower($payment->payment_method) === 'tunai')
+                                                <label class="mb-3 block text-left text-sm font-medium text-gray-700">Uang diterima (minimal Rp{{ number_format($payment->amount, 0, ',', '.') }})
+                                                    <input type="number" name="cash_received" min="{{ (int) $payment->amount }}" step="1" required class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                                                </label>
+                                            @endif
+
                                             <button type="submit"
                                                 class="w-full rounded-lg bg-green-600 px-4 py-3 text-sm font-semibold text-white hover:bg-green-700">
                                                 Verifikasi Pembayaran

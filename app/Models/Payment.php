@@ -15,12 +15,16 @@ class Payment extends Model
         'proof_image',
         'transaction_reference',
         'paid_at',
+        'cash_received',
+        'change_due',
     ];
 
     protected function casts(): array
     {
         return [
             'amount' => 'decimal:2',
+            'cash_received' => 'decimal:2',
+            'change_due' => 'decimal:2',
             'paid_at' => 'datetime',
         ];
     }
