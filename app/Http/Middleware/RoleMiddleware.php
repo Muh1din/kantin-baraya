@@ -13,13 +13,10 @@ class RoleMiddleware
      * permissions. Keep the route-level role checks while accepting both names.
      */
     private const ROLE_ALIASES = [
-        'owner' => 'owner',
+        'pemilik' => 'owner',
         'kasir' => 'cashier',
-        'cashier' => 'cashier',
         'pelanggan' => 'customer',
-        'customer' => 'customer',
         'koki' => 'chef',
-        'chef' => 'chef',
     ];
 
     public function handle(Request $request, Closure $next, string ...$roles): Response

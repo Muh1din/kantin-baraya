@@ -945,9 +945,7 @@ function initializeCart() {
     renderCart();
 }
 
-// ========================================
-// JALANKAN SETELAH DOM SIAP
-// ========================================
+// jalankan setelah DOM siap
 if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initializeCart, {
         once: true,
