@@ -96,3 +96,7 @@
         border-color: var(--color-accent-red) !important;
     }
 }
+
+[x-cloak] {
+    display: none !important;
+}
