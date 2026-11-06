@@ -14,7 +14,7 @@
         rel="stylesheet"
     >
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/auth/login.js'])
 
     @stack('styles')
 </head>

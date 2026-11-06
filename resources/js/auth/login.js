@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("loginForm");
 
@@ -15,6 +14,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const formMessage = document.getElementById("formMessage");
 
+    // Toggle password elements
+    const togglePassword = document.getElementById("togglePassword");
+    const eyeIcon = document.getElementById("eyeIcon");
+
+    const forgotLink = document.getElementById("forgotLink");
+
     // Validasi format email
     function validEmail(value) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
@@ -22,22 +27,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Menampilkan atau menyembunyikan error
     function setError(field, error, hasError) {
+        if (!field || !error) return;
+
         field.classList.toggle("field-error", hasError);
         error.classList.toggle("hidden", !hasError);
     }
 
     // Menghilangkan pesan feedback
     function hideMessage() {
+        if (!formMessage) return;
+
         formMessage.classList.add("hidden");
     }
 
     // Menampilkan feedback
     function showMessage(message, type = "warning") {
+        if (!formMessage) return;
+
         const styles = {
             warning:
                 "rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800",
-            info:
-                "rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-800",
+            info: "rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-800",
         };
 
         formMessage.className = styles[type] || styles.warning;
@@ -68,32 +78,34 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Toggle tampil/sembunyikan password
-    document
-        .getElementById("togglePassword")
-        .addEventListener("click", function () {
+    if (togglePassword && eyeIcon) {
+        togglePassword.addEventListener("click", function () {
             const show = password.type === "password";
 
             password.type = show ? "text" : "password";
 
-            this.setAttribute(
+            togglePassword.setAttribute(
                 "aria-label",
-                show ? "Sembunyikan password" : "Tampilkan password"
+                show ? "Sembunyikan password" : "Tampilkan password",
             );
 
-            document.getElementById("eyeIcon").innerHTML = show
+            togglePassword.setAttribute("aria-pressed", String(show));
+
+            eyeIcon.innerHTML = show
                 ? `
                     <path d="M3 3l18 18" stroke-linecap="round"/>
                     <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"
-                          stroke-linecap="round"/>
+                        stroke-linecap="round"/>
                     <path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.1 0 9.5 7 9.5 7s-3.4 7-9.5 7-9.5-7-9.5-7a16 16 0 0 1 3.1-3.8"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"/>
+                        stroke-linecap="round"
+                        stroke-linejoin="round"/>
                 `
                 : `
                     <path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"/>
                     <circle cx="12" cy="12" r="2.5"/>
                 `;
         });
+    }
 
     // Validasi sebelum mengirim form ke Laravel
     form.addEventListener("submit", function (event) {
@@ -108,9 +120,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!emailValid) {
             event.preventDefault();
 
-            showMessage(
-                "Periksa kembali alamat email yang Anda masukkan."
-            );
+            showMessage("Periksa kembali alamat email yang Anda masukkan.");
 
             email.focus();
             return;
@@ -122,24 +132,19 @@ document.addEventListener("DOMContentLoaded", function () {
             showMessage("Password wajib diisi.");
 
             password.focus();
-            return;
         }
 
         // Jika valid, form dikirim ke endpoint Laravel.
-        // Autentikasi sebenarnya tetap dilakukan oleh backend.
     });
 
-    // Peringatan jika halaman tujuan belum diimplementasikan
-    document
-        .getElementById("forgotLink")
-        .addEventListener("click", function (event) {
+    // Peringatan jika halaman reset password belum tersedia
+    if (forgotLink) {
+        forgotLink.addEventListener("click", function (event) {
             if (this.getAttribute("href") === "#") {
                 event.preventDefault();
 
-                showMessage(
-                    "Halaman reset password belum tersedia.",
-                    "info"
-                );
+                showMessage("Halaman reset password belum tersedia.", "info");
             }
         });
+    }
 });

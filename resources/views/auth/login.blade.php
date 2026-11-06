@@ -155,11 +155,11 @@
                                 placeholder="Masukkan password" class="w-full min-w-0 bg-transparent py-3.5 text-sm"
                                 required>
 
-                            <button type="button" id="togglePassword"
-                                class="shrink-0 rounded-lg p-1 text-typography-muted transition hover:bg-gray-100"
-                                aria-label="Tampilkan password">
-                                <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="1.7">
+                            <button type="button" id="togglePassword" aria-label="Tampilkan password"
+                                aria-pressed="false">
+                                <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z" />
                                     <circle cx="12" cy="12" r="2.5" />
                                 </svg>
@@ -227,9 +227,4 @@
             </div>
         </section>
     </main>
-
-    @push('scripts')
-        <script src="{{ asset('js/auth/login.js') }}" defer></script>
-    @endpush
-
 </x-layouts.login>

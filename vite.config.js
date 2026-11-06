@@ -11,6 +11,7 @@ export default defineConfig({
                 "resources/js/chef/notifikasi.js",
                 "resources/js/home/filter-menu.js",
                 "resources/js/home/card.js",
+                "resources/js/auth/login.js",
             ],
             refresh: true,
         }),

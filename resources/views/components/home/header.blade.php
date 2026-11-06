@@ -32,6 +32,13 @@
                 </span>
             </button>
 
+            <!-- Login -->
+            <a href="{{ route('login') }}"
+                class="flex items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 px-3 py-3 text-sm font-bold text-orange-600 transition hover:bg-orange-100 sm:px-4"
+                aria-label="Login">
+                <span class="hidden sm:inline">Login</span>
+            </a>
+
             <!-- Pesanan Saya -->
             <a href="tracking-pesanan.html"
                 class="flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-3 py-3 text-sm font-bold text-stone-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 sm:px-4"
