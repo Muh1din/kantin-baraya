@@ -86,7 +86,7 @@ class AuthController extends Controller
             'owner' => 'owner.dashboard',
             'cashier' => 'kasir.dashboard',
             'customer' => 'customer.dashboard',
-            'chef' => 'koki.dashboard',
+            'chef' => 'chef.dashboard',
             default => null,
         };
     }
