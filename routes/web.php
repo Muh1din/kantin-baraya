@@ -22,11 +22,11 @@ use App\Http\Controllers\Guest\GuestOrderController;
 
 // PUBLIC & AUTHENTICATION
 
-Route::get('/', [HomeController::class, 'index'])
-    ->name('home');
+// Route::get('/', [HomeController::class, 'index'])
+//     ->name('home');
 
-Route::get('/menu/{token}', [HomeController::class, 'tableMenu'])
-    ->name('menu.table');
+// Route::get('/menu/{token}', [HomeController::class, 'tableMenu'])
+//     ->name('menu.table');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'index'])
