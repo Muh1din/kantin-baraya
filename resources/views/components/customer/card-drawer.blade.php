@@ -53,152 +53,147 @@
     </div>
 </div>
 
-{{-- Checkout Modal --}}
+{{-- Checkout Modal: Khusus Preorder --}}
 <div id="checkoutOverlay"
     class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
     aria-hidden="true">
+
     <div class="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
 
         {{-- Header --}}
         <div class="flex items-center justify-between border-b border-stone-200 px-6 py-5">
             <div>
-                <h2 class="text-xl font-bold text-stone-900">Checkout Pesanan</h2>
+                <h2 class="text-xl font-bold text-stone-900">
+                    Checkout Preorder
+                </h2>
                 <p class="mt-1 text-sm text-stone-500">
-                    Lengkapi informasi pesananmu.
+                    Lengkapi informasi dan jadwal pengambilan pesananmu.
                 </p>
             </div>
 
             <button type="button" id="closeCheckout"
                 class="flex h-9 w-9 items-center justify-center rounded-full text-2xl text-stone-500 transition hover:bg-stone-100 hover:text-stone-900"
                 aria-label="Tutup checkout">
-                &times;
+                ×
             </button>
         </div>
 
         {{-- Form --}}
         <form id="checkoutForm" class="max-h-[75vh] space-y-5 overflow-y-auto p-6">
 
-            {{-- Nama --}}
+            {{-- Nama Pemesan --}}
             <div>
-                <label for="customerName" class="mb-2 block text-sm font-semibold text-stone-700">
+                <label for="customerName"
+                    class="mb-2 block text-sm font-semibold text-stone-700">
                     Nama Pemesan
                 </label>
-                <input type="text" id="customerName" name="customer_name" required autocomplete="name"
-                    placeholder="Masukkan nama"
-                    class="w-full rounded-xl border border-stone-300 px-4 py-3 outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-100">
+
+                <input type="text"
+                    id="customerName"
+                    name="customer_name"
+                    value="{{ auth()->user()->name }}"
+                    readonly
+                    class="w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3 text-stone-600 outline-none">
             </div>
-            {{-- Nomor HP --}}
+
+            {{-- Nomor WhatsApp --}}
             <div id="customerPhoneGroup">
-                <label for="customerPhone" class="mb-2 block text-sm font-semibold text-stone-700">
+                <label for="customerPhone"
+                    class="mb-2 block text-sm font-semibold text-stone-700">
                     Nomor WhatsApp
-                    <span id="phoneRequiredLabel" class="text-red-500">*</span>
-                    <span id="phoneOptionalLabel" class="hidden font-normal text-stone-400">
-                        (Opsional)
-                    </span>
                 </label>
 
-                <input type="tel" id="customerPhone" name="customer_phone" autocomplete="tel"
+                <input type="tel"
+                    id="customerPhone"
+                    name="customer_phone"
+                    autocomplete="tel"
                     placeholder="Contoh: 081234567890"
                     class="w-full rounded-xl border border-stone-300 px-4 py-3 outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-100">
             </div>
 
-            {{-- Pilihan Waktu Pesanan --}}
-            <div>
-                <label for="orderMode" class="mb-2 block text-sm font-semibold text-stone-700">
-                    Waktu Pemesanan
-                </label>
-
-                <select id="orderMode" name="order_mode" required
-                    class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-100">
-                    <option value="sekarang">Pesan Sekarang</option>
-                    <option value="preorder">Preorder</option>
-                </select>
-
-                <p class="mt-2 text-xs text-stone-500">
-                    Preorder digunakan untuk menentukan jadwal pengambilan pesanan.
-                </p>
-            </div>
-
-            {{-- Jenis Pesanan: hanya Pesan Sekarang --}}
-            <div id="orderTypeGroup">
-                <label for="orderType" class="mb-2 block text-sm font-semibold text-stone-700">
-                    Jenis Pesanan
-                </label>
-
-                <select id="orderType" name="order_type"
-                    class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-100">
-                    <option value="bungkus">Bungkus</option>
-                    <option value="makan_di_tempat">Makan di Tempat</option>
-                </select>
-            </div>
-
             {{-- Jadwal Preorder --}}
-            <div id="preorderSchedule" class="hidden space-y-4">
+            <div class="space-y-4">
 
                 <div>
-                    <label for="pickupDate" class="mb-2 block text-sm font-semibold text-stone-700">
+                    <label for="pickupDate"
+                        class="mb-2 block text-sm font-semibold text-stone-700">
                         Tanggal Pengambilan
                     </label>
 
-                    <input type="date" id="pickupDate" name="pickup_date"
+                    <input type="date"
+                        id="pickupDate"
+                        name="pickup_date"
+                        required
                         class="w-full rounded-xl border border-stone-300 px-4 py-3 outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-100">
                 </div>
 
                 <div>
-                    <label for="pickupTime" class="mb-2 block text-sm font-semibold text-stone-700">
+                    <label for="pickupTime"
+                        class="mb-2 block text-sm font-semibold text-stone-700">
                         Jam Pengambilan
                     </label>
 
-                    <input type="time" id="pickupTime" name="pickup_time"
+                    <input type="time"
+                        id="pickupTime"
+                        name="pickup_time"
+                        required
                         class="w-full rounded-xl border border-stone-300 px-4 py-3 outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-100">
                 </div>
 
                 <div class="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-                    Preorder wajib dibayar menggunakan QRIS. Pesanan diproses setelah pembayaran dikonfirmasi.
+                    Preorder wajib dibayar menggunakan QRIS.
+                    Pesanan akan diproses setelah pembayaran dikonfirmasi oleh Kasir.
                 </div>
             </div>
 
-            {{-- Metode Pembayaran --}}
+            {{-- Metode Pembayaran: QRIS --}}
             <div>
-                <label for="paymentMethod" class="mb-2 block text-sm font-semibold text-stone-700">
+                <label class="mb-2 block text-sm font-semibold text-stone-700">
                     Metode Pembayaran
                 </label>
 
-                <div id="paymentMethodSelect">
-                    <select id="paymentMethod" name="payment_method" required
-                        class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-100">
-                        <option value="tunai">Tunai</option>
-                        <option value="qris">QRIS</option>
-                    </select>
+                <input type="hidden" id="paymentMethod"
+                    name="payment_method" value="qris">
+
+                <div class="w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3">
+                    <span class="font-semibold text-stone-700">
+                        QRIS
+                    </span>
+
+                    <span class="ml-2 text-xs text-stone-500">
+                        Wajib untuk preorder
+                    </span>
                 </div>
 
-                {{-- Tampilan khusus preorder --}}
-                <div id="paymentMethodFixed"
-                    class="hidden w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3">
-                    <span class="font-semibold text-stone-700">QRIS</span>
-                    <span class="ml-2 text-xs text-stone-500">Wajib untuk preorder</span>
-                </div>
-
-                <p id="paymentInfo" class="mt-2 text-xs text-stone-500">
-                    Pilih metode pembayaran pesananmu.
+                <p class="mt-2 text-xs text-stone-500">
+                    Silakan lakukan pembayaran setelah pesanan berhasil dibuat.
                 </p>
             </div>
 
             {{-- Catatan --}}
             <div>
-                <label for="orderNotes" class="mb-2 block text-sm font-semibold text-stone-700">
-                    Catatan <span class="font-normal text-stone-400">(Opsional)</span>
+                <label for="orderNotes"
+                    class="mb-2 block text-sm font-semibold text-stone-700">
+                    Catatan
+                    <span class="font-normal text-stone-400">(Opsional)</span>
                 </label>
 
-                <textarea id="orderNotes" name="notes" rows="3" placeholder="Contoh: tidak pedas, sambal dipisah..."
+                <textarea id="orderNotes"
+                    name="notes"
+                    rows="3"
+                    placeholder="Contoh: tidak pedas, sambal dipisah..."
                     class="w-full resize-none rounded-xl border border-stone-300 px-4 py-3 outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-100"></textarea>
             </div>
 
             {{-- Total --}}
             <div class="rounded-xl bg-stone-50 p-4">
                 <div class="flex items-center justify-between gap-4">
-                    <span class="font-semibold text-stone-600">Total Pembayaran</span>
-                    <span id="checkoutTotal" class="text-xl font-bold text-amber-700">
+                    <span class="font-semibold text-stone-600">
+                        Total Pembayaran
+                    </span>
+
+                    <span id="checkoutTotal"
+                        class="text-xl font-bold text-amber-700">
                         Rp0
                     </span>
                 </div>
@@ -207,7 +202,7 @@
             {{-- Tombol --}}
             <button type="submit"
                 class="w-full rounded-xl bg-amber-600 px-5 py-3.5 font-bold text-white transition hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2">
-                Lanjutkan Pesanan
+                Buat Pesanan Preorder
             </button>
 
         </form>

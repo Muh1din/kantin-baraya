@@ -29,7 +29,7 @@ use App\Http\Controllers\Guest\GuestOrderController;
 //     ->name('menu.table');
 
 Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthController::class, 'index'])
+    Route::get('/', [AuthController::class, 'index'])
         ->name('login');
 
     Route::post('/login', [AuthController::class, 'store'])

@@ -7,10 +7,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ $title }}</title>
 
-    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/home/card.js'])
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/customer/filter-menu.js', 'resources/js/customer/card.js'])
+
+    @stack('styles')
+    @stack('scripts')
 </head>
 
 <body class="h-full bg-stone-50 text-stone-900 antialiased">

@@ -51,4 +51,9 @@ class Order extends Model
         return $this->hasMany(OrderStatusHistory::class)
             ->orderBy('created_at', 'asc');
     }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'customer_id');
+    }
 }
