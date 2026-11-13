@@ -156,8 +156,7 @@
                 Katalog Menu
             </a>
 
-            <a 
-            {{-- href="{{ route('customer.orders.index') }}" --}}
+            <a href="{{ route('customer.orders.index') }}"
              @class([
                 'flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm lg:w-full',
                 'bg-orange-50 font-bold text-orange-700' => request()->routeIs(
@@ -176,9 +175,7 @@
                 Apresiasi
             </div>
 
-            <a 
-            {{-- href="{{ route('customer.loyalty.index') }}" --}}
-             @class([
+            <a href="{{ route('customer.loyalty.index') }}" @class([
                 'flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm lg:w-full',
                 'bg-orange-50 font-bold text-orange-700' => request()->routeIs(
                     'customer.loyalty.*'),
@@ -196,8 +193,7 @@
                 Lainnya
             </div>
 
-            <a 
-            {{-- href="{{ route('customer.notifications.index') }}"  --}}
+            <a href="{{ route('customer.notifications.index') }}"
             @class([
                 'flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm lg:w-full',
                 'bg-orange-50 font-bold text-orange-700' => request()->routeIs(
@@ -209,10 +205,13 @@
                 @click="mobileNavOpen = false; userProfileOpen = false;">
                 <span aria-hidden="true">🔔</span>
                 Notifikasi
+                @php($unreadNotifications = auth()->user()->unreadNotifications()->count())
+                @if ($unreadNotifications > 0)
+                    <span class="ml-auto rounded-full bg-orange-500 px-2 py-0.5 text-[10px] font-black text-white">{{ $unreadNotifications }}</span>
+                @endif
             </a>
 
-            <a 
-            {{-- href="{{ route('customer.profile.edit') }}"  --}}
+            <a href="{{ route('customer.profile.edit') }}"
             @class([
                 'flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm lg:w-full',
                 'bg-orange-50 font-bold text-orange-700' => request()->routeIs(

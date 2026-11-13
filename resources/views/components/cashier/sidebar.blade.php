@@ -1,3 +1,79 @@
+@php
+    $user = auth()->user();
+
+    $navigationGroups = [
+        [
+            'label' => 'Operasional',
+            'items' => [
+                [
+                    'label' => 'Pesanan Masuk',
+                    'route' => 'kasir.orders.index',
+                    'active' => 'kasir.orders.index',
+                    'icon' => '▤',
+                ],
+                [
+                    'label' => 'Pesanan Berjalan',
+                    'route' => 'kasir.orders.processing',
+                    'active' => 'kasir.orders.processing',
+                    'icon' => '◷',
+                ],
+                [
+                    'label' => 'Data Pelanggan',
+                    'route' => 'kasir.customers.index',
+                    'active' => 'kasir.customers.*',
+                    'icon' => '♙',
+                ],
+            ],
+        ],
+        [
+            'label' => 'Laporan',
+            'items' => [
+                [
+                    'label' => 'Laporan Transaksi',
+                    'route' => 'kasir.reports.transactions',
+                    'active' => 'kasir.reports.transactions',
+                    'icon' => '▥',
+                ],
+                [
+                    'label' => 'Penjualan Menu',
+                    'route' => 'kasir.reports.menu-sales',
+                    'active' => 'kasir.reports.menu-sales',
+                    'icon' => '▦',
+                ],
+            ],
+        ],
+        [
+            'label' => 'Inventory',
+            'items' => [
+                [
+                    'label' => 'Daftar Bahan Baku',
+                    'route' => 'kasir.inventory.index',
+                    'active' => 'kasir.inventory.index',
+                    'icon' => '▣',
+                ],
+                [
+                    'label' => 'Stok Masuk',
+                    'route' => 'kasir.inventory.stock-in.form',
+                    'active' => 'kasir.inventory.stock-in*',
+                    'icon' => '＋',
+                ],
+                [
+                    'label' => 'Stok Keluar',
+                    'route' => 'kasir.inventory.stock-out.form',
+                    'active' => 'kasir.inventory.stock-out*',
+                    'icon' => '−',
+                ],
+                [
+                    'label' => 'Riwayat Stok',
+                    'route' => 'kasir.inventory.history',
+                    'active' => 'kasir.inventory.history',
+                    'icon' => '↺',
+                ],
+            ],
+        ],
+    ];
+@endphp
+
 <div x-data="{
     mobileNavOpen: false,
     userProfileOpen: false,
@@ -18,21 +94,18 @@
             userProfileOpen = false;
         }
     ">
-    {{-- SIDEBAR CASHIER --}}
+    {{-- SIDEBAR --}}
     <aside
         class="border-b border-stone-200 bg-white
                lg:fixed lg:inset-y-0 lg:left-0 lg:z-40
                lg:flex lg:w-72 lg:flex-col
                lg:border-b-0 lg:border-r">
         {{-- HEADER --}}
-        <div
-            class="flex items-center justify-between gap-3
-                   px-5 py-5
-                   lg:shrink-0 lg:px-7 lg:py-7">
+        <div class="flex items-center justify-between gap-3 px-5 py-5 lg:shrink-0 lg:px-7 lg:py-7">
+
             {{-- BRAND --}}
-            <a 
-            {{-- href="{{ route('kasir.dashboard') }}" --}}
-             class="flex min-w-0 items-center gap-3">
+            <a href="{{ Route::has('kasir.dashboard') ? route('kasir.dashboard') : '#' }}"
+                class="flex min-w-0 items-center gap-3">
                 <div
                     class="grid h-11 w-11 shrink-0 place-items-center
                            rounded-2xl bg-orange-500 text-lg
@@ -112,9 +185,7 @@
                    lg:px-4 lg:pt-4 lg:opacity-100
                    lg:shadow-none">
             {{-- DASHBOARD --}}
-            <a 
-            {{-- href="{{ route('kasir.dashboard') }}"  --}}
-            @class([
+            <a href="{{ Route::has('kasir.dashboard') ? route('kasir.dashboard') : '#' }}" @class([
                 'flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm lg:w-full',
                 'bg-orange-50 font-bold text-orange-700' => request()->routeIs(
                     'kasir.dashboard'),
@@ -122,66 +193,42 @@
                     'kasir.dashboard'),
             ])
                 @if (request()->routeIs('kasir.dashboard')) aria-current="page" @endif
-                @click="mobileNavOpen = false; userProfileOpen = false">
+                @click="mobileNavOpen = false; userProfileOpen = false;">
                 <span class="text-lg" aria-hidden="true">⌂</span>
                 Dashboard
             </a>
 
-            {{-- OPERASIONAL --}}
-            <div class="mt-4 px-4 text-[10px] font-bold
-                       uppercase tracking-wider text-stone-400">
-                Operasional
-            </div>
+            {{-- NAVIGATION GROUPS --}}
+            @foreach ($navigationGroups as $group)
+                <div class="mt-4 px-4 text-[10px] font-bold uppercase tracking-wider text-stone-400">
+                    {{ $group['label'] }}
+                </div>
 
-            {{-- PENGELOLAAN PESANAN --}}
-            <a href="{{ \Illuminate\Support\Facades\Route::has('kasir.orders.index') ? route('kasir.orders.index') : '#' }}"
-                @class([
-                    'flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm lg:w-full',
-                    'bg-orange-50 font-bold text-orange-700' => request()->routeIs(
-                        'kasir.orders.*'),
-                    'font-semibold text-stone-600 transition hover:bg-stone-50 hover:text-orange-700' => !request()->routeIs(
-                        'kasir.orders.*'),
-                ]) @if (request()->routeIs('kasir.orders.*')) aria-current="page" @endif
-                @click="mobileNavOpen = false; userProfileOpen = false">
-                <span class="text-lg" aria-hidden="true">▤</span>
-                Pengelolaan Pesanan
-            </a>
+                @foreach ($group['items'] as $item)
+                    @php
+                        $isActive = request()->routeIs($item['active']);
+                        $hasRoute = Route::has($item['route']);
+                    @endphp
 
-            {{-- KASIR / POS --}}
-            <a 
-            {{-- href="{{ \Illuminate\Support\Facades\Route::has('kasir.pos.index') ? route('kasir.pos.index') : '#' }}" --}}
-                @class([
-                    'flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm lg:w-full',
-                    'bg-orange-50 font-bold text-orange-700' => request()->routeIs(
-                        'kasir.pos.*'),
-                    'font-semibold text-stone-600 transition hover:bg-stone-50 hover:text-orange-700' => !request()->routeIs(
-                        'kasir.pos.*'),
-                ]) @if (request()->routeIs('kasir.pos.*')) aria-current="page" @endif
-                @click="mobileNavOpen = false; userProfileOpen = false">
-                <span class="text-lg" aria-hidden="true">▦</span>
-                Kasir / POS
-            </a>
+                    <a href="{{ $hasRoute ? route($item['route']) : '#' }}" @class([
+                        'flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm lg:w-full',
+                        'bg-orange-50 font-bold text-orange-700' => $isActive,
+                        'font-semibold text-stone-600 transition hover:bg-stone-50 hover:text-orange-700' => !$isActive,
+                        'cursor-not-allowed opacity-50' => !$hasRoute,
+                    ])
+                        @if ($isActive) aria-current="page" @endif
+                        @click="
+                            mobileNavOpen = false;
+                            userProfileOpen = false;
+                        ">
+                        <span class="text-lg" aria-hidden="true">
+                            {{ $item['icon'] }}
+                        </span>
 
-            {{-- TRANSAKSI --}}
-            <div class="mt-4 px-4 text-[10px] font-bold
-                       uppercase tracking-wider text-stone-400">
-                Transaksi
-            </div>
-
-            {{-- RIWAYAT TRANSAKSI --}}
-            <a 
-            {{-- href="{{ \Illuminate\Support\Facades\Route::has('kasir.pos.history') ? route('kasir.pos.history') : '#' }}" --}}
-                @class([
-                    'flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm lg:w-full',
-                    'bg-orange-50 font-bold text-orange-700' => request()->routeIs(
-                        'kasir.pos.history'),
-                    'font-semibold text-stone-600 transition hover:bg-stone-50 hover:text-orange-700' => !request()->routeIs(
-                        'kasir.pos.history'),
-                ]) @if (request()->routeIs('kasir.pos.history')) aria-current="page" @endif
-                @click="mobileNavOpen = false; userProfileOpen = false">
-                <span class="text-lg" aria-hidden="true">▥</span>
-                Riwayat Transaksi
-            </a>
+                        {{ $item['label'] }}
+                    </a>
+                @endforeach
+            @endforeach
 
             {{-- SPACER DESKTOP --}}
             <div class="hidden lg:block lg:flex-1"></div>
@@ -201,13 +248,13 @@
                         class="grid h-10 w-10 shrink-0 place-items-center
                                rounded-full bg-orange-100
                                font-bold text-orange-700">
-                        {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr(auth()->user()->name, 0, 1)) }}
+                        {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($user->name, 0, 1)) }}
                     </div>
 
                     {{-- USER INFO --}}
                     <div class="min-w-0 flex-1">
                         <p class="truncate text-sm font-bold text-stone-800">
-                            {{ auth()->user()->name }}
+                            {{ $user->name }}
                         </p>
 
                         <p class="text-xs text-stone-500">
@@ -239,18 +286,18 @@
                         </p>
 
                         <p class="mt-2 truncate text-sm font-bold text-stone-900">
-                            {{ auth()->user()->name }}
+                            {{ $user->name }}
                         </p>
 
                         <p class="mt-1 break-all text-xs text-stone-500">
-                            {{ auth()->user()->email }}
+                            {{ $user->email }}
                         </p>
 
                         <span
                             class="mt-3 inline-flex rounded-full
                                    bg-orange-50 px-3 py-1
                                    text-xs font-bold text-orange-700">
-                            Cashier
+                            Kasir
                         </span>
                     </div>
 
@@ -309,8 +356,9 @@
                 <p id="cashier-logout-description" class="mt-2 text-sm leading-6 text-stone-500">
                     Apakah kamu yakin ingin keluar dari akun
                     <span class="font-bold text-stone-700">
-                        {{ auth()->user()->name }}
+                        {{ $user->name }}
                     </span>?
+
                     Kamu harus login kembali untuk mengakses panel Kasir.
                 </p>
             </div>

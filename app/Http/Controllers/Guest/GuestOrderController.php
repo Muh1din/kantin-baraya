@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Guest;
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
 use App\Models\Order;
+use App\Services\VoucherService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -12,20 +13,21 @@ use Illuminate\Validation\ValidationException;
 
 class GuestOrderController extends Controller
 {
-    public function store(Request $request)
+    public function store(Request $request, VoucherService $voucherService)
     {
         $validated = $request->validate([
             'customer_name' => ['required', 'string', 'max:255'],
             'customer_phone' => ['nullable', 'string', 'max:30'],
             'order_type' => ['required', 'in:bungkus,makan_di_tempat'],
             'payment_method' => ['required', 'in:tunai,qris'],
+            'voucher_code' => ['nullable', 'string', 'max:50'],
             'notes' => ['nullable', 'string', 'max:2000'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.id' => ['required', 'integer', 'distinct'],
             'items.*.quantity' => ['required', 'integer', 'min:1', 'max:100'],
         ]);
 
-        $order = DB::transaction(function () use ($validated) {
+        $order = DB::transaction(function () use ($validated, $voucherService) {
             $menus = collect();
 
             foreach ($validated['items'] as $item) {
@@ -55,18 +57,22 @@ class GuestOrderController extends Controller
             $subtotal = $menus->sum(
                 fn ($item) => $item['menu']->price * $item['quantity']
             );
+            $voucherApplication = $voucherService->apply($validated['voucher_code'] ?? null, $subtotal);
+            $discountAmount = $voucherApplication['discount_amount'];
+            $totalAmount = $voucherApplication['total_amount'];
 
             $order = Order::create([
                 'order_code' => 'ORD-' . Str::upper(Str::random(10)),
                 'tracking_token' => Str::random(48),
                 'customer_name' => $validated['customer_name'],
                 'customer_phone' => $validated['customer_phone'] ?? null,
+                'voucher_id' => $voucherApplication['voucher']?->id,
                 'order_channel' => 'online',
                 'order_type' => $validated['order_type'],
                 'order_status' => 'pending',
                 'subtotal' => $subtotal,
-                'discount_amount' => 0,
-                'total_amount' => $subtotal,
+                'discount_amount' => $discountAmount,
+                'total_amount' => $totalAmount,
                 'notes' => $validated['notes'] ?? null,
             ]);
 
@@ -86,16 +92,20 @@ class GuestOrderController extends Controller
             $order->payment()->create([
                 'payment_method' => $validated['payment_method'],
                 'payment_status' => 'pending',
-                'amount' => $subtotal,
+                'amount' => $totalAmount,
             ]);
 
             return $order;
         });
 
+        $order->load('voucher');
+
         return response()->json([
             'message' => 'Pesanan berhasil dibuat.',
             'order_code' => $order->order_code,
             'tracking_token' => $order->tracking_token,
+            'discount_amount' => $order->discount_amount,
+            'voucher_code' => $order->voucher?->code,
             'total_amount' => $order->total_amount,
             'payment_method' => $validated['payment_method'],
         ], 201);

@@ -22,10 +22,6 @@
     <section class="space-y-6">
         {{-- Page Heading --}}
         <div>
-            <h1 class="text-2xl font-bold text-typography-heading">
-                Pengelolaan Pesanan
-            </h1>
-
             <p class="mt-1 text-sm text-gray-500">
                 Pantau dan cari pesanan pelanggan yang masuk.
             </p>

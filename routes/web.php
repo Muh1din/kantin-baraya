@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\Home\HomeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Owner\TableController;
 use App\Http\Controllers\Owner\ReportController;
@@ -11,29 +10,45 @@ use App\Http\Controllers\Owner\MenuController;
 use App\Http\Controllers\Owner\IngredientController;
 use App\Http\Controllers\Owner\IngredientStockMovementController;
 use App\Http\Controllers\Owner\RecipeController;
+use App\Http\Controllers\Owner\UserController;
+use App\Http\Controllers\Owner\OperationalHourController;
+use App\Http\Controllers\Owner\HolidayController;
+use App\Http\Controllers\Owner\CustomerController as OwnerCustomerController;
+use App\Http\Controllers\Owner\VoucherController;
+use App\Http\Controllers\Owner\RewardController;
 use App\Http\Controllers\Cashier\CashierDashboardController;
+use App\Http\Controllers\Cashier\CustomerController as CashierCustomerController;
+use App\Http\Controllers\Cashier\TransactionReportController;
+use App\Http\Controllers\Cashier\MenuSalesReportController;
+use App\Http\Controllers\Cashier\InventoryController as CashierInventoryController;
 use App\Http\Controllers\Cashier\OrderController as CashierOrderController;
 use App\Http\Controllers\Cashier\PosController;
 use App\Http\Controllers\Chef\ChefDashboardController;
 use App\Http\Controllers\Customer\CustomerController;
+use App\Http\Controllers\Customer\LoyaltyController;
+use App\Http\Controllers\Customer\NotificationController;
+use App\Http\Controllers\Customer\ProfileController;
 use App\Http\Controllers\Customer\MenuCatalogController;
 use App\Http\Controllers\Guest\GuestOrderController;
-
+use App\Http\Controllers\Owner\DashboardController as OwnerDashboardController;
 
 // PUBLIC & AUTHENTICATION
 
-Route::get('/', [HomeController::class, 'index'])
-    ->name('home');
+// Route::get('/', [HomeController::class, 'index'])
+//     ->name('home');
 
-Route::get('/menu/{token}', [HomeController::class, 'tableMenu'])
-    ->name('menu.table');
+// Route::get('/menu/{token}', [HomeController::class, 'tableMenu'])
+//     ->name('menu.table');
 
 Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthController::class, 'index'])
+    Route::get('/', [AuthController::class, 'index'])
         ->name('login');
 
     Route::post('/login', [AuthController::class, 'store'])
         ->name('login.store');
+
+    Route::get('/register', [AuthController::class, 'registrationForm'])->name('register');
+    Route::post('/register', [AuthController::class, 'register'])->name('register.store');
 });
 
 Route::post('/logout', [AuthController::class, 'destroy'])
@@ -47,11 +62,45 @@ Route::prefix('owner')
     ->middleware(['auth', 'role:owner'])
     ->group(function () {
 
-        Route::get('/dashboard', [DashboardController::class, 'index'])
+
+        Route::get('/dashboard', [OwnerDashboardController::class, 'index'])
             ->name('dashboard');
+
+        // Employee account management
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->whereNumber('user')->name('users.destroy');
+
+        // Customer accounts and their existing order history
+        Route::get('/customers', [OwnerCustomerController::class, 'index'])->name('customers.index');
+        Route::get('/customers/{customer}', [OwnerCustomerController::class, 'show'])->whereNumber('customer')->name('customers.show');
+
+        // Discount voucher management
+        Route::get('/vouchers', [VoucherController::class, 'index'])->name('vouchers.index');
+        Route::post('/vouchers', [VoucherController::class, 'store'])->name('vouchers.store');
+        Route::get('/vouchers/{voucher}/edit', [VoucherController::class, 'edit'])->name('vouchers.edit');
+        Route::put('/vouchers/{voucher}', [VoucherController::class, 'update'])->name('vouchers.update');
+        Route::delete('/vouchers/{voucher}', [VoucherController::class, 'destroy'])->name('vouchers.destroy');
+
+        // Free-menu rewards redeemed with customer points
+        Route::get('/rewards', [RewardController::class, 'index'])->name('rewards.index');
+        Route::post('/rewards', [RewardController::class, 'store'])->name('rewards.store');
+        Route::get('/rewards/{reward}/edit', [RewardController::class, 'edit'])->name('rewards.edit');
+        Route::put('/rewards/{reward}', [RewardController::class, 'update'])->name('rewards.update');
+        Route::delete('/rewards/{reward}', [RewardController::class, 'destroy'])->name('rewards.destroy');
+
+        // Operational hours and holidays
+        Route::get('/operational-hours', [OperationalHourController::class, 'index'])->name('operational-hours.index');
+        Route::put('/operational-hours', [OperationalHourController::class, 'update'])->name('operational-hours.update');
+        Route::get('/holidays', [HolidayController::class, 'index'])->name('holidays.index');
+        Route::post('/holidays', [HolidayController::class, 'store'])->name('holidays.store');
+        Route::delete('/holidays/{holiday}', [HolidayController::class, 'destroy'])->whereNumber('holiday')->name('holidays.destroy');
 
         // Reports
         Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/financial', [ReportController::class, 'financial'])->name('financial');
+            Route::get('/transactions', [ReportController::class, 'transactions'])->name('transactions');
+            Route::get('/menu-sales', [ReportController::class, 'menuSales'])->name('menu-sales');
             Route::get('/index', [ReportController::class, 'index'])->name('index');
             Route::get('/sales', [ReportController::class, 'sales'])->name('sales');
             Route::get('/profit', [ReportController::class, 'profit'])->name('profit');
@@ -107,6 +156,27 @@ Route::prefix('kasir')
         Route::get('/dashboard', [CashierDashboardController::class, 'index'])
             ->name('dashboard');
 
+        Route::get('/inventory', [CashierInventoryController::class, 'index'])->name('inventory.index');
+        Route::post('/inventory', [CashierInventoryController::class, 'store'])->name('inventory.store');
+        Route::get('/inventory/stock-in', [CashierInventoryController::class, 'stockInForm'])->name('inventory.stock-in.form');
+        Route::get('/inventory/stock-out', [CashierInventoryController::class, 'stockOutForm'])->name('inventory.stock-out.form');
+        Route::get('/inventory/history', [CashierInventoryController::class, 'history'])->name('inventory.history');
+        Route::get('/inventory/{ingredient}/edit', [CashierInventoryController::class, 'edit'])->whereNumber('ingredient')->name('inventory.edit');
+        Route::put('/inventory/{ingredient}', [CashierInventoryController::class, 'update'])->whereNumber('ingredient')->name('inventory.update');
+        Route::post('/inventory/stock-in', [CashierInventoryController::class, 'stockIn'])->name('inventory.stock-in');
+        Route::post('/inventory/stock-out', [CashierInventoryController::class, 'stockOut'])->name('inventory.stock-out');
+
+        // Customer directory and transaction history are read-only.
+        Route::get('/customers', [CashierCustomerController::class, 'index'])->name('customers.index');
+        Route::get('/customers/{customer}', [CashierCustomerController::class, 'show'])
+            ->whereNumber('customer')
+            ->name('customers.show');
+
+        Route::get('/reports/transactions', [TransactionReportController::class, 'index'])
+            ->name('reports.transactions');
+        Route::get('/reports/menu-sales', [MenuSalesReportController::class, 'index'])
+            ->name('reports.menu-sales');
+
         // POS
         Route::prefix('pos')->name('pos.')->group(function () {
             Route::get('/', [PosController::class, 'index'])->name('index');
@@ -118,9 +188,17 @@ Route::prefix('kasir')
         // Order Management
         Route::prefix('orders')->name('orders.')->group(function () {
             Route::get('/', [CashierOrderController::class, 'index'])->name('index');
+
+            // Pesanan Berjalan
+            Route::get('/berjalan', [CashierOrderController::class, 'processing'])
+                ->name('processing');
+
             Route::get('/{order}', [CashierOrderController::class, 'show'])->whereNumber('order')->name('show');
+
             Route::post('/{order}/confirm', [CashierOrderController::class, 'confirm'])->whereNumber('order')->name('confirm');
+
             Route::post('/{order}/reject', [CashierOrderController::class, 'reject'])->whereNumber('order')->name('reject');
+
             Route::post('/{order}/payments/{payment}/verify', [CashierOrderController::class, 'verifyPayment'])
                 ->whereNumber('order')
                 ->whereNumber('payment')
@@ -163,6 +241,26 @@ Route::prefix('customer')
 
         Route::get('/menus', [MenuCatalogController::class, 'index'])
             ->name('menus.index');
+
+        Route::get('/orders', [CustomerController::class, 'orders'])
+            ->name('orders.index');
+
+        Route::get('/loyalty', [LoyaltyController::class, 'index'])
+            ->name('loyalty.index');
+        Route::post('/loyalty/rewards/{reward}/redeem', [LoyaltyController::class, 'redeem'])
+            ->whereNumber('reward')
+            ->name('loyalty.redeem');
+
+        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])
+            ->name('notifications.read');
+
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+        Route::post('/orders', [CustomerController::class, 'storeOrder'])->name('orders.store');
+        Route::post('/orders/{token}/payment-proof', [CustomerController::class, 'uploadPaymentProof'])
+            ->name('orders.payment-proof');
     });
 
 

@@ -1,4 +1,4 @@
-<x-layouts.login title="Nota {{ $order->order_code }}">
+<x-layouts.kasir title="Nota {{ $order->order_code }}">
     <main class="min-h-screen bg-orange-50/60 px-4 py-10 sm:px-6">
         <article class="mx-auto max-w-2xl rounded-3xl border border-orange-100 bg-white p-6 shadow-sm sm:p-8">
             <div class="flex flex-wrap items-start justify-between gap-4 border-b border-stone-200 pb-5">
@@ -44,4 +44,4 @@
             </div>
         </article>
     </main>
-</x-layouts.login>
+</x-layouts.kasir>

@@ -9,6 +9,7 @@ use App\Models\Unit;
 use App\Models\User;
 use App\Services\IngredientStockService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use InvalidArgumentException;
 use Tests\TestCase;
 
@@ -98,7 +99,7 @@ class IngredientManagementTest extends TestCase
         $this->assertSame(IngredientStockMovement::TYPE_OPENING_BALANCE, $movement->movement_type);
         $this->assertSame('5.250', $movement->quantity_change);
         $this->assertSame('5.250', $movement->stock_after);
-        $this->assertSame(auth()->id(), $movement->user_id);
+        $this->assertSame(Auth::id(), $movement->user_id);
         $this->assertDatabaseHas('ingredients', ['id' => $ingredient->id, 'current_stock' => '5.250']);
     }
 
@@ -140,7 +141,7 @@ class IngredientManagementTest extends TestCase
         $unit = $this->unit();
         $ingredient = $this->createIngredient($unit, ['current_stock' => '7.125']);
         $movement = $ingredient->stockMovements()->create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'movement_type' => IngredientStockMovement::TYPE_OPENING_BALANCE,
             'quantity_change' => '7.125',
             'stock_after' => '7.125',
@@ -228,7 +229,7 @@ class IngredientManagementTest extends TestCase
         $this->actingAs($kasir)->put(route('owner.ingredients.update', $ingredient), [])->assertForbidden();
         $this->actingAs($kasir)->patch(route('owner.ingredients.toggle-status', $ingredient))->assertForbidden();
 
-        auth()->logout();
+        Auth::logout();
         $this->get(route('owner.ingredients.index'))->assertRedirect(route('login'));
     }
 

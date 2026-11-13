@@ -6,6 +6,7 @@ function initializeCart() {
     // ========================================
     // 1. ELEMEN KERANJANG
     // ========================================
+
     const cartButton = document.getElementById("cartButton");
     const cartOverlay = document.getElementById("cartOverlay");
     const closeCartButton = document.getElementById("closeCart");
@@ -19,38 +20,41 @@ function initializeCart() {
     // ========================================
     // 2. ELEMEN CHECKOUT
     // ========================================
+
     const checkoutOverlay = document.getElementById("checkoutOverlay");
     const closeCheckout = document.getElementById("closeCheckout");
     const checkoutForm = document.getElementById("checkoutForm");
     const checkoutTotal = document.getElementById("checkoutTotal");
 
-    const orderMode = document.getElementById("orderMode");
-    const orderTypeGroup = document.getElementById("orderTypeGroup");
-    const orderType = document.getElementById("orderType");
-    const preorderSchedule = document.getElementById("preorderSchedule");
+    const customerName = document.getElementById("customerName");
+    const customerPhone = document.getElementById("customerPhone");
     const pickupDate = document.getElementById("pickupDate");
     const pickupTime = document.getElementById("pickupTime");
     const paymentMethod = document.getElementById("paymentMethod");
-    const paymentInfo = document.getElementById("paymentInfo");
-    const customerPhoneGroup = document.getElementById("customerPhoneGroup");
-    const phoneRequiredLabel = document.getElementById("phoneRequiredLabel");
-    const phoneOptionalLabel = document.getElementById("phoneOptionalLabel");
 
-    // Modal QRIS
+    // ========================================
+    // 3. ELEMEN QRIS
+    // ========================================
+
     const qrisOverlay = document.getElementById("qrisOverlay");
     const closeQris = document.getElementById("closeQris");
     const backToCheckout = document.getElementById("backToCheckout");
     const qrisTotal = document.getElementById("qrisTotal");
+    const qrisDiscount = document.getElementById("qrisDiscount");
 
     const paymentProof = document.getElementById("paymentProof");
     const paymentProofInfo = document.getElementById("paymentProofInfo");
     const confirmQrisPayment = document.getElementById("confirmQrisPayment");
+
     const qrisImage = document.getElementById("qrisImage");
     const qrisPlaceholder = document.getElementById("qrisPlaceholder");
     const downloadQris = document.getElementById("downloadQris");
     const qrisImageInfo = document.getElementById("qrisImageInfo");
 
-    // Jangan jalankan fitur keranjang jika elemen utamanya tidak tersedia.
+    // ========================================
+    // 4. VALIDASI ELEMEN UTAMA
+    // ========================================
+
     if (
         !cartButton ||
         !cartOverlay ||
@@ -61,7 +65,6 @@ function initializeCart() {
         return;
     }
 
-    // Mencegah event listener terpasang berulang kali.
     if (cartButton.dataset.cartInitialized === "true") {
         return;
     }
@@ -72,8 +75,9 @@ function initializeCart() {
     let closeTimer;
 
     // ========================================
-    // 3. LOCAL STORAGE
+    // 5. LOCAL STORAGE
     // ========================================
+
     function readCart() {
         try {
             const storedCart = JSON.parse(
@@ -103,8 +107,9 @@ function initializeCart() {
     }
 
     // ========================================
-    // 4. FORMAT HARGA DAN JUMLAH
+    // 6. FORMAT HARGA DAN JUMLAH
     // ========================================
+
     function formatPrice(value) {
         return `Rp${new Intl.NumberFormat("id-ID").format(value)}`;
     }
@@ -124,8 +129,9 @@ function initializeCart() {
     }
 
     // ========================================
-    // 5. UPDATE TOMBOL MENU
+    // 7. UPDATE TOMBOL MENU
     // ========================================
+
     function updateProductButtons() {
         document
             .querySelectorAll('.product-card [data-action="add"]')
@@ -138,18 +144,16 @@ function initializeCart() {
                         : "+ Tambah ke Keranjang";
 
                 button.classList.toggle("bg-orange-50", quantity > 0);
-
                 button.classList.toggle("text-orange-600", quantity > 0);
-
                 button.classList.toggle("bg-orange-500", quantity === 0);
-
                 button.classList.toggle("text-white", quantity === 0);
             });
     }
 
     // ========================================
-    // 6. TOMBOL JUMLAH MENU
+    // 8. TOMBOL JUMLAH MENU
     // ========================================
+
     function createQuantityButton(label, text, action, id) {
         const button = document.createElement("button");
 
@@ -167,8 +171,9 @@ function initializeCart() {
     }
 
     // ========================================
-    // 7. RENDER KERANJANG
+    // 9. RENDER KERANJANG
     // ========================================
+
     function renderCart() {
         cartItems.replaceChildren();
 
@@ -202,7 +207,6 @@ function initializeCart() {
                 row.className =
                     "flex items-center gap-3 rounded-2xl border border-stone-100 p-3";
 
-                // Gambar menu
                 const image = document.createElement("div");
 
                 image.className =
@@ -225,28 +229,20 @@ function initializeCart() {
                     image.textContent = "🍽️";
                 }
 
-                // Informasi menu
                 const details = document.createElement("div");
-
                 details.className = "min-w-0 flex-1";
 
                 const name = document.createElement("p");
-
                 name.className = "truncate text-sm font-bold text-stone-800";
-
                 name.textContent = item.name;
 
                 const price = document.createElement("p");
-
                 price.className = "mt-1 text-xs font-semibold text-orange-600";
-
                 price.textContent = formatPrice(item.price);
 
                 details.append(name, price);
 
-                // Kontrol jumlah
                 const controls = document.createElement("div");
-
                 controls.className = "flex items-center gap-2";
 
                 controls.append(
@@ -254,12 +250,8 @@ function initializeCart() {
                 );
 
                 const count = document.createElement("span");
-
                 count.className = "min-w-5 text-center text-sm font-bold";
-
                 count.textContent = String(item.quantity);
-
-                count.setAttribute("aria-label", `Jumlah ${item.name}`);
 
                 controls.append(
                     count,
@@ -271,10 +263,8 @@ function initializeCart() {
             });
         }
 
-        // Update ringkasan keranjang
         if (cartCount) {
             cartCount.textContent = String(quantity);
-
             cartCount.classList.toggle("cart-count-pop", quantity > 0);
         }
 
@@ -294,8 +284,9 @@ function initializeCart() {
     }
 
     // ========================================
-    // 8. BUKA DAN TUTUP KERANJANG
+    // 10. BUKA DAN TUTUP KERANJANG
     // ========================================
+
     function openCart() {
         window.clearTimeout(closeTimer);
 
@@ -324,7 +315,6 @@ function initializeCart() {
         cartDrawer.classList.add("translate-y-full", "sm:translate-x-full");
 
         cartOverlay.setAttribute("aria-hidden", "true");
-
         cartButton.setAttribute("aria-expanded", "false");
 
         document.body.classList.remove("overflow-hidden");
@@ -332,12 +322,9 @@ function initializeCart() {
         closeTimer = window.setTimeout(() => {
             cartOverlay.classList.add("hidden");
         }, 220);
-
-        cartButton.focus();
     }
 
     cartButton.addEventListener("click", openCart);
-
     closeCartButton.addEventListener("click", closeCart);
 
     cartOverlay.addEventListener("click", (event) => {
@@ -347,115 +334,47 @@ function initializeCart() {
     });
 
     // ========================================
-    // 9. PILIHAN CHECKOUT
+    // 11. CHECKOUT PREORDER
     // ========================================
+
     function updateCheckoutOptions() {
-        if (
-            !orderMode ||
-            !orderTypeGroup ||
-            !preorderSchedule ||
-            !pickupDate ||
-            !pickupTime ||
-            !paymentMethod
-        ) {
-            return;
+        // Semua pesanan Customer adalah preorder.
+        // Jenis pesanan selalu bungkus.
+        // Pembayaran selalu QRIS.
+
+        if (paymentMethod) {
+            paymentMethod.value = "qris";
         }
 
-        const isPreorder = orderMode.value === "preorder";
+        if (pickupDate) {
+            pickupDate.required = true;
 
-        // Nomor telepon: hanya tampil saat preorder.
-        customerPhoneGroup?.classList.toggle("hidden", !isPreorder);
+            const today = new Date();
+
+            const localToday = [
+                today.getFullYear(),
+                String(today.getMonth() + 1).padStart(2, "0"),
+                String(today.getDate()).padStart(2, "0"),
+            ].join("-");
+
+            pickupDate.min = localToday;
+        }
+
+        if (pickupTime) {
+            pickupTime.required = true;
+        }
 
         if (customerPhone) {
-            customerPhone.required = isPreorder;
-
-            // Kosongkan nomor telepon saat memilih Pesan Sekarang.
-            if (!isPreorder) {
-                customerPhone.value = "";
-            }
-        }
-
-        phoneRequiredLabel?.classList.toggle("hidden", !isPreorder);
-        phoneOptionalLabel?.classList.toggle("hidden", isPreorder);
-
-        // Tampilkan pilihan sesuai jenis pesanan.
-        orderTypeGroup.classList.toggle("hidden", isPreorder);
-        preorderSchedule.classList.toggle("hidden", !isPreorder);
-
-        if (orderType) {
-            orderType.disabled = isPreorder;
-            orderType.required = !isPreorder;
-        }
-
-        // Validasi jadwal preorder.
-        pickupDate.required = isPreorder;
-        pickupTime.required = isPreorder;
-
-        // Metode pembayaran.
-        if (isPreorder) {
-            paymentMethod.value = "qris";
-            paymentMethod.disabled = true;
-
-            // Hilangkan dropdown dan tampilkan QRIS sebagai teks.
-            paymentMethodSelect?.classList.add("hidden");
-            paymentMethodFixed?.classList.remove("hidden");
-
-            if (paymentInfo) {
-                paymentInfo.textContent =
-                    "Preorder wajib dibayar menggunakan QRIS.";
-            }
-        } else {
-            paymentMethod.disabled = false;
-
-            // Kembalikan dropdown saat pesan sekarang.
-            paymentMethodSelect?.classList.remove("hidden");
-            paymentMethodFixed?.classList.add("hidden");
-
-            if (paymentInfo) {
-                paymentInfo.textContent =
-                    paymentMethod.value === "tunai"
-                        ? "Pembayaran tunai dipilih untuk pesanan sekarang."
-                        : "Pembayaran menggunakan QRIS.";
-            }
+            customerPhone.required = true;
         }
     }
 
-    orderMode?.addEventListener("change", updateCheckoutOptions);
-
-    paymentMethod?.addEventListener("change", () => {
-        if (!paymentInfo || !orderMode || orderMode.value !== "sekarang") {
-            return;
-        }
-
-        paymentInfo.textContent =
-            paymentMethod.value === "tunai"
-                ? "Pembayaran tunai dipilih untuk pesanan sekarang."
-                : "Pembayaran menggunakan QRIS.";
-    });
-
-    // ========================================
-    // 10. BATAS TANGGAL PREORDER
-    // ========================================
-    if (pickupDate) {
-        const today = new Date();
-
-        const localToday = [
-            today.getFullYear(),
-            String(today.getMonth() + 1).padStart(2, "0"),
-            String(today.getDate()).padStart(2, "0"),
-        ].join("-");
-
-        pickupDate.min = localToday;
-    }
-
-    // ========================================
-    // 11. BUKA DAN TUTUP CHECKOUT
-    // ========================================
     function openCheckout() {
         if (!checkoutOverlay || !checkoutTotal) {
             console.error(
                 "Checkout tidak ditemukan. Periksa ID checkoutOverlay dan checkoutTotal.",
             );
+
             return;
         }
 
@@ -463,10 +382,8 @@ function initializeCart() {
             return;
         }
 
-        // Perbarui total berdasarkan isi keranjang terbaru.
         checkoutTotal.textContent = formatPrice(calculateSubtotal());
 
-        // Terapkan opsi sesuai pilihan checkout.
         updateCheckoutOptions();
 
         checkoutOverlay.classList.remove("hidden");
@@ -474,7 +391,6 @@ function initializeCart() {
 
         checkoutOverlay.setAttribute("aria-hidden", "false");
 
-        // Tutup keranjang setelah checkout dibuka.
         closeCart();
     }
 
@@ -503,8 +419,9 @@ function initializeCart() {
     });
 
     // ========================================
-    // 12. SUBMIT CHECKOUT KE BACKEND
+    // 12. SUBMIT CHECKOUT
     // ========================================
+
     checkoutForm?.addEventListener("submit", async (event) => {
         event.preventDefault();
 
@@ -515,12 +432,12 @@ function initializeCart() {
             return;
         }
 
-        const selectedPayment =
-            orderMode.value === "preorder" ? "qris" : paymentMethod.value;
+        if (!pickupDate?.value || !pickupTime?.value) {
+            alert("Silakan tentukan tanggal dan jam pengambilan.");
+            return;
+        }
 
         const formData = new FormData(checkoutForm);
-
-        formData.set("payment_method", selectedPayment);
 
         const items = entries.map(([id, item]) => ({
             id: Number(id),
@@ -543,7 +460,7 @@ function initializeCart() {
         }
 
         try {
-            const response = await fetch("/guest/orders", {
+            const response = await fetch(checkoutForm.dataset.orderUrl, {
                 method: "POST",
                 headers: {
                     Accept: "application/json",
@@ -553,8 +470,18 @@ function initializeCart() {
                 body: JSON.stringify({
                     customer_name: formData.get("customer_name"),
                     customer_phone: formData.get("customer_phone"),
-                    order_type: formData.get("order_type"),
-                    payment_method: selectedPayment,
+
+                    // Preorder selalu dibungkus.
+                    order_type: "bungkus",
+
+                    // Pembayaran selalu QRIS.
+                    payment_method: "qris",
+
+                    // Jadwal preorder.
+                    pickup_date: pickupDate.value,
+                    pickup_time: pickupTime.value,
+
+                    voucher_code: formData.get("voucher_code")?.trim() || null,
                     notes: formData.get("notes"),
                     items,
                 }),
@@ -573,21 +500,32 @@ function initializeCart() {
 
             currentOrderToken = result.tracking_token;
 
-            if (selectedPayment === "qris") {
-                qrisTotal.textContent = checkoutTotal.textContent;
-                openQrisModal();
-            } else {
-                alert(
-                    `Pesanan berhasil dibuat!\nKode pesanan: ${result.order_code}\nTotal: Rp${Number(result.total_amount).toLocaleString("id-ID")}`,
-                );
-
-                cart = {};
-                persistCart();
-                renderCart();
-                closeCheckoutModal();
+            if (!qrisTotal || !qrisOverlay) {
+                alert("Modal QRIS tidak ditemukan.");
+                return;
             }
+
+            const serverTotal = formatPrice(Number(result.total_amount));
+            if (checkoutTotal) {
+                checkoutTotal.textContent = serverTotal;
+            }
+            qrisTotal.textContent = serverTotal;
+
+            const discountAmount = Number(result.discount_amount ?? 0);
+            if (qrisDiscount) {
+                if (discountAmount > 0) {
+                    qrisDiscount.textContent = `Voucher ${result.voucher_code}: -${formatPrice(discountAmount)}`;
+                    qrisDiscount.classList.remove("hidden");
+                } else {
+                    qrisDiscount.textContent = "";
+                    qrisDiscount.classList.add("hidden");
+                }
+            }
+
+            openQrisModal();
         } catch (error) {
             console.error("Checkout error:", error);
+
             alert("Tidak dapat menghubungi server. Silakan coba lagi.");
         } finally {
             if (submitButton) {
@@ -599,6 +537,7 @@ function initializeCart() {
     // ========================================
     // 13. TAMBAHKAN MENU KE KERANJANG
     // ========================================
+
     function addMenuToCart(card, button) {
         const id = card.dataset.productId;
 
@@ -610,7 +549,6 @@ function initializeCart() {
         const stock = Number(card.dataset.stock ?? 0);
         const quantity = (existing?.quantity ?? 0) + 1;
 
-        // Pemeriksaan stok sementara dari data kartu menu.
         if (stock > 0 && quantity > stock) {
             button.animate(
                 [
@@ -664,6 +602,7 @@ function initializeCart() {
     // ========================================
     // 14. EVENT MENU DAN JUMLAH KERANJANG
     // ========================================
+
     document.addEventListener("click", (event) => {
         const target = event.target;
 
@@ -671,7 +610,6 @@ function initializeCart() {
             return;
         }
 
-        // Tombol tambah menu.
         const addButton = target.closest('.product-card [data-action="add"]');
 
         if (addButton) {
@@ -684,7 +622,6 @@ function initializeCart() {
             return;
         }
 
-        // Tombol tambah/kurangi jumlah di keranjang.
         const quantityButton = target.closest("[data-cart-action]");
 
         if (!quantityButton || !cart[quantityButton.dataset.id]) {
@@ -718,6 +655,7 @@ function initializeCart() {
     // ========================================
     // 15. TOMBOL ESCAPE
     // ========================================
+
     document.addEventListener("keydown", (event) => {
         if (event.key !== "Escape") {
             return;
@@ -728,39 +666,58 @@ function initializeCart() {
             return;
         }
 
+        if (qrisOverlay && !qrisOverlay.classList.contains("hidden")) {
+            closeQrisModal();
+            return;
+        }
+
         if (!cartOverlay.classList.contains("hidden")) {
             closeCart();
         }
     });
 
-    // Modal Qris
-    function openQrisModal() {
-        qrisTotal.textContent = checkoutTotal.textContent;
+    // ========================================
+    // 16. MODAL QRIS
+    // ========================================
 
-        checkoutOverlay.classList.add("hidden");
-        checkoutOverlay.classList.remove("flex");
+    function openQrisModal() {
+        if (!qrisOverlay || !checkoutOverlay) {
+            return;
+        }
 
         qrisOverlay.classList.remove("hidden");
         qrisOverlay.classList.add("flex");
+
         qrisOverlay.setAttribute("aria-hidden", "false");
+
+        checkoutOverlay.classList.add("hidden");
+        checkoutOverlay.classList.remove("flex");
     }
 
     function closeQrisModal() {
+        if (!qrisOverlay) {
+            return;
+        }
+
         qrisOverlay.classList.add("hidden");
         qrisOverlay.classList.remove("flex");
+
         qrisOverlay.setAttribute("aria-hidden", "true");
     }
 
-    closeQris.addEventListener("click", closeQrisModal);
+    closeQris?.addEventListener("click", closeQrisModal);
 
-    backToCheckout.addEventListener("click", () => {
+    backToCheckout?.addEventListener("click", () => {
         closeQrisModal();
 
-        checkoutOverlay.classList.remove("hidden");
-        checkoutOverlay.classList.add("flex");
+        checkoutOverlay?.classList.remove("hidden");
+        checkoutOverlay?.classList.add("flex");
     });
 
-    // Validasi Bukti pembayaran
+    // ========================================
+    // 17. VALIDASI BUKTI PEMBAYARAN
+    // ========================================
+
     if (paymentProof) {
         paymentProof.addEventListener("change", () => {
             const file = paymentProof.files[0];
@@ -774,6 +731,7 @@ function initializeCart() {
                     paymentProofInfo.textContent =
                         "Format JPG, PNG, atau WebP. Maksimal 5 MB.";
                 }
+
                 return;
             }
 
@@ -810,8 +768,11 @@ function initializeCart() {
         });
     }
 
-    // if (confirmQrisPayment) {
-    confirmQrisPayment.addEventListener("click", async () => {
+    // ========================================
+    // 18. UPLOAD BUKTI PEMBAYARAN
+    // ========================================
+
+    confirmQrisPayment?.addEventListener("click", async () => {
         const file = paymentProof?.files[0];
 
         if (!currentOrderToken) {
@@ -840,7 +801,7 @@ function initializeCart() {
 
         try {
             const response = await fetch(
-                `/guest/orders/${encodeURIComponent(currentOrderToken)}/payment-proof`,
+                checkoutForm.dataset.proofUrl.replace("__ORDER_TOKEN__", encodeURIComponent(currentOrderToken)),
                 {
                     method: "POST",
                     headers: {
@@ -872,20 +833,29 @@ function initializeCart() {
             }
 
             cart = {};
+
             persistCart();
             renderCart();
         } catch (error) {
             console.error("Upload bukti pembayaran error:", error);
+
             alert("Upload gagal karena masalah koneksi. Silakan coba lagi.");
         } finally {
             confirmQrisPayment.disabled = false;
         }
     });
 
+    // ========================================
+    // 19. GAMBAR QRIS
+    // ========================================
+
     function updateQrisImage() {
         const imageUrl = qrisImage?.getAttribute("src");
+
         const isConfigured =
-            Boolean(imageUrl) && qrisImage.complete && qrisImage.naturalWidth > 0;
+            Boolean(imageUrl) &&
+            qrisImage.complete &&
+            qrisImage.naturalWidth > 0;
 
         qrisImage?.classList.toggle("hidden", !isConfigured);
         qrisPlaceholder?.classList.toggle("hidden", isConfigured);
@@ -906,50 +876,20 @@ function initializeCart() {
     qrisImage?.addEventListener("load", updateQrisImage);
     qrisImage?.addEventListener("error", updateQrisImage);
 
-    downloadQris?.addEventListener("click", async () => {
-        const imageUrl = qrisImage?.getAttribute("src");
-
-        if (!imageUrl || !qrisImage?.naturalWidth) {
-            alert("Gambar QRIS belum tersedia.");
-            return;
-        }
-
-        try {
-            const response = await fetch(qrisImage.src);
-
-            if (!response.ok) {
-                throw new Error("Gambar QRIS gagal diunduh.");
-            }
-
-            const blob = await response.blob();
-            const blobUrl = URL.createObjectURL(blob);
-
-            const link = document.createElement("a");
-            link.href = blobUrl;
-            link.download = "qris-kantin-baraya.png";
-
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-
-            setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-        } catch (error) {
-            console.error("Download QRIS gagal:", error);
-            alert("QRIS gagal diunduh. Silakan coba lagi.");
-        }
-    });
     // ========================================
-    // 16. INISIALISASI AWAL
+    // 20. INISIALISASI
     // ========================================
+
     updateCheckoutOptions();
     renderCart();
 }
 
-// jalankan setelah DOM siap
+// ========================================
+// JALANKAN KETIKA DOM SIAP
+// ========================================
+
 if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initializeCart, {
-        once: true,
-    });
+    document.addEventListener("DOMContentLoaded", initializeCart);
 } else {
     initializeCart();
 }

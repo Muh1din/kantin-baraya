@@ -1,4 +1,4 @@
-<!doctype html>
+{{-- <!doctype html>
 <html lang="id">
 
 <head>
@@ -13,13 +13,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    {{-- <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/home/filter-menu.js', 'resources/js/home/card.js'])
 
     @stack('styles')
-    @stack('scripts')
-</head>
+    @stack('scripts') --}}
+{{-- </head>
 
 <body class="min-h-screen font-sans">
     <x-home.header></x-home.header>
@@ -31,4 +31,4 @@
     <x-home.card-drawer />
 </body>
 
-</html>
+</html> --}}
