@@ -71,6 +71,8 @@ class CustomerLoyaltyTest extends TestCase
             'type' => 'earned',
             'points' => 25,
         ]);
+        $this->assertSame('loyalty_earned', $customer->notifications()->sole()->data['kind']);
+        $this->assertStringContainsString('25 poin', $customer->notifications()->sole()->data['message']);
 
         $this->from(route('kasir.orders.show', $order))
             ->post(route('kasir.orders.payments.verify', [$order, $payment]))
@@ -130,6 +132,13 @@ class CustomerLoyaltyTest extends TestCase
             ->assertRedirect(route('customer.loyalty.index'))
             ->assertSessionHas('status');
 
+        $this->get(route('customer.loyalty.index'))
+            ->assertOk()
+            ->assertSee('Riwayat Poin')
+            ->assertSee('Penukaran ' . $menu->name)
+            ->assertSee('−200 poin')
+            ->assertSee('Pesanan RWD-');
+
         $order = Order::query()->sole();
         $this->assertSame($customer->id, $order->customer_id);
         $this->assertSame('loyalty', $order->order_channel);
@@ -149,6 +158,8 @@ class CustomerLoyaltyTest extends TestCase
             'type' => 'redeemed',
             'points' => 200,
         ]);
+        $this->assertSame('loyalty_redeemed', $customer->notifications()->sole()->data['kind']);
+        $this->assertStringContainsString('200 poin', $customer->notifications()->sole()->data['message']);
 
         $chef = $this->userWithRole('koki');
         $this->actingAs($chef)
@@ -177,6 +188,54 @@ class CustomerLoyaltyTest extends TestCase
         $this->assertSame(0, Order::query()->count());
         $this->assertSame(0, LoyaltyPointTransaction::query()->count());
         $this->assertSame(0, $outOfStockMenu->fresh()->stock);
+    }
+
+    public function test_customer_loyalty_page_shows_earned_and_redeemed_point_history(): void
+    {
+        $customer = $this->userWithRole('customer');
+        $account = LoyaltyAccount::query()->create(['user_id' => $customer->id, 'saldo_poin' => 35]);
+        $menu = $this->menu();
+        $reward = Reward::query()->create([
+            'menu_id' => $menu->id,
+            'points_required' => 15,
+            'is_active' => true,
+        ]);
+        $order = Order::query()->create([
+            'customer_id' => $customer->id,
+            'order_code' => 'RWD-HISTORY-001',
+            'tracking_token' => 'reward-history-customer-token',
+            'customer_name' => $customer->name,
+            'order_channel' => 'loyalty',
+            'order_type' => 'bungkus',
+            'order_status' => 'confirmed',
+            'subtotal' => 5000,
+            'discount_amount' => 5000,
+            'total_amount' => 0,
+        ]);
+        LoyaltyPointTransaction::query()->create([
+            'loyalty_account_id' => $account->id,
+            'type' => 'earned',
+            'points' => 50,
+            'description' => 'Poin dari pembayaran pesanan',
+        ]);
+        LoyaltyPointTransaction::query()->create([
+            'loyalty_account_id' => $account->id,
+            'order_id' => $order->id,
+            'reward_id' => $reward->id,
+            'type' => 'redeemed',
+            'points' => 15,
+            'description' => 'Penukaran ' . $menu->name . ' dengan kode pesanan ' . $order->order_code,
+        ]);
+
+        $this->actingAs($customer)
+            ->get(route('customer.loyalty.index'))
+            ->assertOk()
+            ->assertSee('35 poin')
+            ->assertSee('Poin dari pembayaran pesanan')
+            ->assertSee('+50 poin')
+            ->assertSee('Penukaran ' . $menu->name)
+            ->assertSee('−15 poin')
+            ->assertSee($order->order_code);
     }
 
     public function test_only_customers_can_view_and_redeem_loyalty_rewards(): void

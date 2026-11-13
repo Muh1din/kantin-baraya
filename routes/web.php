@@ -22,6 +22,8 @@ use App\Http\Controllers\Cashier\PosController;
 use App\Http\Controllers\Chef\ChefDashboardController;
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Customer\LoyaltyController;
+use App\Http\Controllers\Customer\NotificationController;
+use App\Http\Controllers\Customer\ProfileController;
 use App\Http\Controllers\Customer\MenuCatalogController;
 use App\Http\Controllers\Guest\GuestOrderController;
 use App\Http\Controllers\Owner\DashboardController as OwnerDashboardController;
@@ -223,6 +225,13 @@ Route::prefix('customer')
         Route::post('/loyalty/rewards/{reward}/redeem', [LoyaltyController::class, 'redeem'])
             ->whereNumber('reward')
             ->name('loyalty.redeem');
+
+        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])
+            ->name('notifications.read');
+
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
         Route::post('/orders', [CustomerController::class, 'storeOrder'])->name('orders.store');
         Route::post('/orders/{token}/payment-proof', [CustomerController::class, 'uploadPaymentProof'])

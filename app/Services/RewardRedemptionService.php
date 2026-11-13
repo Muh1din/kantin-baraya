@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Reward;
 use App\Models\User;
+use App\Notifications\CustomerActivityNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -95,6 +96,12 @@ class RewardRedemptionService
                 'points' => $reward->points_required,
                 'description' => 'Penukaran ' . $menu->name . ' dengan kode pesanan ' . $order->order_code,
             ]);
+
+            $customer->notify(new CustomerActivityNotification(
+                'Poin digunakan',
+                "{$reward->points_required} poin ditukar dengan menu {$menu->name}.",
+                ['kind' => 'loyalty_redeemed', 'order_id' => $order->id, 'order_code' => $order->order_code, 'points' => $reward->points_required],
+            ));
 
             return $order;
         });

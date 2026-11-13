@@ -6,6 +6,7 @@ use App\Models\LoyaltyAccount;
 use App\Models\LoyaltyPointTransaction;
 use App\Models\Order;
 use App\Models\User;
+use App\Notifications\CustomerActivityNotification;
 
 class LoyaltyPointService
 {
@@ -59,6 +60,12 @@ class LoyaltyPointService
             'points' => $points,
             'description' => 'Poin dari pembayaran pesanan ' . $order->order_code,
         ]);
+
+        $customer->notify(new CustomerActivityNotification(
+            'Poin bertambah',
+            "Anda mendapatkan {$points} poin dari pembayaran pesanan {$order->order_code}.",
+            ['kind' => 'loyalty_earned', 'order_id' => $order->id, 'points' => $points],
+        ));
 
         return $points;
     }
