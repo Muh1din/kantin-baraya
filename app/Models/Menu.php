@@ -38,9 +38,14 @@ class Menu extends Model
         return $this->hasMany(MenuIngredient::class);
     }
 
+    public function rewards(): HasMany
+    {
+        return $this->hasMany(Reward::class);
+    }
+
     // public function saleItems(): HasMany
     // public function items(): HasMany
     // {
-    //     return $this->hasMany(OrderItem::class);
+    //     return $thPis->hasMany(OrderItem::class);
     // }
 }

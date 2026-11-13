@@ -11,6 +11,7 @@ class Order extends Model
     protected $fillable = [
         'table_id',
         'customer_id',
+        'voucher_id',
         'created_by',
         'order_code',
         'tracking_token',
@@ -55,5 +56,10 @@ class Order extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'customer_id');
+    }
+
+    public function voucher(): BelongsTo
+    {
+        return $this->belongsTo(Voucher::class)->withTrashed();
     }
 }

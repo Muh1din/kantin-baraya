@@ -79,7 +79,7 @@
         </div>
 
         {{-- Form --}}
-        <form id="checkoutForm" class="max-h-[75vh] space-y-5 overflow-y-auto p-6">
+        <form id="checkoutForm" data-order-url="{{ route('customer.orders.store') }}" data-proof-url="{{ route('customer.orders.payment-proof', ['token' => '__ORDER_TOKEN__']) }}" class="max-h-[75vh] space-y-5 overflow-y-auto p-6">
 
             {{-- Nama Pemesan --}}
             <div>
@@ -185,6 +185,17 @@
                     class="w-full resize-none rounded-xl border border-stone-300 px-4 py-3 outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-100"></textarea>
             </div>
 
+            {{-- Voucher Diskon --}}
+            <div>
+                <label for="voucherCode" class="mb-2 block text-sm font-semibold text-stone-700">
+                    Kode Voucher <span class="font-normal text-stone-400">(Opsional)</span>
+                </label>
+                <input type="text" id="voucherCode" name="voucher_code" maxlength="50" autocomplete="off"
+                    autocapitalize="characters" placeholder="Masukkan kode voucher"
+                    class="w-full rounded-xl border border-stone-300 px-4 py-3 uppercase outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-100">
+                <p class="mt-1 text-xs text-stone-500">Voucher akan divalidasi saat pesanan dibuat.</p>
+            </div>
+
             {{-- Total --}}
             <div class="rounded-xl bg-stone-50 p-4">
                 <div class="flex items-center justify-between gap-4">
@@ -244,6 +255,7 @@
                 <p id="qrisTotal" class="mt-1 text-2xl font-bold text-amber-700">
                     Rp0
                 </p>
+                <p id="qrisDiscount" class="mt-2 hidden text-sm font-semibold text-green-700"></p>
             </div>
 
             {{-- QRIS --}}

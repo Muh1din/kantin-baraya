@@ -40,6 +40,7 @@ function initializeCart() {
     const closeQris = document.getElementById("closeQris");
     const backToCheckout = document.getElementById("backToCheckout");
     const qrisTotal = document.getElementById("qrisTotal");
+    const qrisDiscount = document.getElementById("qrisDiscount");
 
     const paymentProof = document.getElementById("paymentProof");
     const paymentProofInfo = document.getElementById("paymentProofInfo");
@@ -459,7 +460,7 @@ function initializeCart() {
         }
 
         try {
-            const response = await fetch("/guest/orders", {
+            const response = await fetch(checkoutForm.dataset.orderUrl, {
                 method: "POST",
                 headers: {
                     Accept: "application/json",
@@ -480,6 +481,7 @@ function initializeCart() {
                     pickup_date: pickupDate.value,
                     pickup_time: pickupTime.value,
 
+                    voucher_code: formData.get("voucher_code")?.trim() || null,
                     notes: formData.get("notes"),
                     items,
                 }),
@@ -503,7 +505,22 @@ function initializeCart() {
                 return;
             }
 
-            qrisTotal.textContent = checkoutTotal.textContent;
+            const serverTotal = formatPrice(Number(result.total_amount));
+            if (checkoutTotal) {
+                checkoutTotal.textContent = serverTotal;
+            }
+            qrisTotal.textContent = serverTotal;
+
+            const discountAmount = Number(result.discount_amount ?? 0);
+            if (qrisDiscount) {
+                if (discountAmount > 0) {
+                    qrisDiscount.textContent = `Voucher ${result.voucher_code}: -${formatPrice(discountAmount)}`;
+                    qrisDiscount.classList.remove("hidden");
+                } else {
+                    qrisDiscount.textContent = "";
+                    qrisDiscount.classList.add("hidden");
+                }
+            }
 
             openQrisModal();
         } catch (error) {
@@ -784,7 +801,7 @@ function initializeCart() {
 
         try {
             const response = await fetch(
-                `/guest/orders/${encodeURIComponent(currentOrderToken)}/payment-proof`,
+                checkoutForm.dataset.proofUrl.replace("__ORDER_TOKEN__", encodeURIComponent(currentOrderToken)),
                 {
                     method: "POST",
                     headers: {

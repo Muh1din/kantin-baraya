@@ -8,6 +8,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
 use App\Models\Order;
+use App\Services\LoyaltyPointService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -184,9 +185,10 @@ class OrderController extends Controller
 
     public function verifyPayment(
         int $order,
-        int $payment
+        int $payment,
+        LoyaltyPointService $loyaltyPointService,
     ): RedirectResponse {
-        DB::transaction(function () use ($order, $payment) {
+        DB::transaction(function () use ($order, $payment, $loyaltyPointService) {
             $orderRecord = Order::query()
                 ->where('order_channel', 'online')
                 ->lockForUpdate()
@@ -233,10 +235,27 @@ class OrderController extends Controller
                 'payment_status' => 'paid',
                 'paid_at' => now(),
             ]);
+
+            $loyaltyPointService->awardForPaidOrder($orderRecord);
         });
 
         return redirect()
             ->route('kasir.orders.show', $order)
             ->with('success', 'Pembayaran berhasil diverifikasi.');
+    }
+
+    public function processing(Request $request): View
+    {
+        $orders = Order::query()
+            ->with(['items', 'payment'])
+            ->where('order_channel', 'online')
+            ->where('order_status', 'confirmed')
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('cashier.orders.processing', [
+            'orders' => $orders,
+        ]);
     }
 }

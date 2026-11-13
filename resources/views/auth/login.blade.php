@@ -195,6 +195,11 @@
                         </svg>
                     </button>
 
+                <p class="mt-5 text-center text-sm text-stone-600">
+                    Belum punya akun Customer?
+                    <a href="{{ route('register') }}" class="font-bold text-orange-600 hover:underline">Daftar di sini</a>
+                </p>
+
                     {{-- FEEDBACK JAVASCRIPT --}}
                     <div id="formMessage" class="hidden rounded-xl border px-4 py-3 text-sm" role="status"
                         aria-live="polite"></div>
