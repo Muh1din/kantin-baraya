@@ -1,4 +1,4 @@
-<x-layouts.login title="POS Kasir">
+<x-layouts.cashier title="POS Kasir">
     <main class="min-h-screen bg-orange-50/60 px-4 py-8 sm:px-6">
         <div class="mx-auto max-w-7xl">
             <header class="flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-gradient-to-br from-orange-500 via-orange-500 to-amber-400 p-6 text-white shadow-lg">
@@ -102,4 +102,4 @@
             render();
         })();
     </script>
-</x-layouts.login>
+</x-layouts.cashier>

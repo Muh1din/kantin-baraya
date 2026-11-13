@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
-use App\Models\Order;
-use App\Models\OrderItem;
 use App\Models\Payment;
+use App\Models\Order;
+use App\Services\MenuSalesReportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
 class ReportController extends Controller
 {
-    public function menuSales(Request $request): View
+    public function menuSales(Request $request, MenuSalesReportService $reportService): View
     {
         $validated = $request->validate([
             'start_date' => ['nullable', 'date_format:Y-m-d'],
@@ -21,33 +21,10 @@ class ReportController extends Controller
 
         $startDate = $validated['start_date'] ?? now()->startOfMonth()->toDateString();
         $endDate = $validated['end_date'] ?? now()->toDateString();
-        $start = Carbon::createFromFormat('Y-m-d', $startDate)->startOfDay();
-        $end = Carbon::createFromFormat('Y-m-d', $endDate)->endOfDay();
-
-        // Distinct order IDs avoid multiplying item rows when an order has
-        // multiple successful payment records.
-        $validOrderIds = Payment::query()
-            ->where('payment_status', 'paid')
-            ->where('amount', '>', 0)
-            ->whereNotNull('paid_at')
-            ->whereBetween('paid_at', [$start, $end])
-            ->select('order_id')
-            ->distinct();
-
-        $menuSales = OrderItem::query()
-            ->join('orders', 'orders.id', '=', 'order_items.order_id')
-            ->whereIn('orders.id', $validOrderIds)
-            ->select('order_items.menu_id', 'order_items.menu_name')
-            ->selectRaw('SUM(order_items.quantity) as quantity_sold')
-            ->selectRaw('SUM(order_items.subtotal) as revenue')
-            ->groupBy('order_items.menu_id', 'order_items.menu_name')
-            ->orderByDesc('revenue')
-            ->orderBy('order_items.menu_name')
-            ->paginate(20)
-            ->withQueryString();
+        $report = $reportService->report($startDate, $endDate);
 
         return view('owner.reports.menu-sales', [
-            'menuSales' => $menuSales,
+            ...$report,
             'startDate' => $startDate,
             'endDate' => $endDate,
         ]);
@@ -67,7 +44,7 @@ class ReportController extends Controller
         $end = Carbon::createFromFormat('Y-m-d', $endDate)->endOfDay();
 
         $query = Order::query()
-            ->with(['payment' => fn ($query) => $query->orderByDesc('id')])
+            ->with(['payment' => fn($query) => $query->orderByDesc('id')])
             ->whereBetween('created_at', [$start, $end]);
 
         if (! empty($validated['status'])) {

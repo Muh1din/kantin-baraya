@@ -17,6 +17,10 @@ use App\Http\Controllers\Owner\CustomerController as OwnerCustomerController;
 use App\Http\Controllers\Owner\VoucherController;
 use App\Http\Controllers\Owner\RewardController;
 use App\Http\Controllers\Cashier\CashierDashboardController;
+use App\Http\Controllers\Cashier\CustomerController as CashierCustomerController;
+use App\Http\Controllers\Cashier\TransactionReportController;
+use App\Http\Controllers\Cashier\MenuSalesReportController;
+use App\Http\Controllers\Cashier\InventoryController as CashierInventoryController;
 use App\Http\Controllers\Cashier\OrderController as CashierOrderController;
 use App\Http\Controllers\Cashier\PosController;
 use App\Http\Controllers\Chef\ChefDashboardController;
@@ -151,6 +155,27 @@ Route::prefix('kasir')
 
         Route::get('/dashboard', [CashierDashboardController::class, 'index'])
             ->name('dashboard');
+
+        Route::get('/inventory', [CashierInventoryController::class, 'index'])->name('inventory.index');
+        Route::post('/inventory', [CashierInventoryController::class, 'store'])->name('inventory.store');
+        Route::get('/inventory/stock-in', [CashierInventoryController::class, 'stockInForm'])->name('inventory.stock-in.form');
+        Route::get('/inventory/stock-out', [CashierInventoryController::class, 'stockOutForm'])->name('inventory.stock-out.form');
+        Route::get('/inventory/history', [CashierInventoryController::class, 'history'])->name('inventory.history');
+        Route::get('/inventory/{ingredient}/edit', [CashierInventoryController::class, 'edit'])->whereNumber('ingredient')->name('inventory.edit');
+        Route::put('/inventory/{ingredient}', [CashierInventoryController::class, 'update'])->whereNumber('ingredient')->name('inventory.update');
+        Route::post('/inventory/stock-in', [CashierInventoryController::class, 'stockIn'])->name('inventory.stock-in');
+        Route::post('/inventory/stock-out', [CashierInventoryController::class, 'stockOut'])->name('inventory.stock-out');
+
+        // Customer directory and transaction history are read-only.
+        Route::get('/customers', [CashierCustomerController::class, 'index'])->name('customers.index');
+        Route::get('/customers/{customer}', [CashierCustomerController::class, 'show'])
+            ->whereNumber('customer')
+            ->name('customers.show');
+
+        Route::get('/reports/transactions', [TransactionReportController::class, 'index'])
+            ->name('reports.transactions');
+        Route::get('/reports/menu-sales', [MenuSalesReportController::class, 'index'])
+            ->name('reports.menu-sales');
 
         // POS
         Route::prefix('pos')->name('pos.')->group(function () {

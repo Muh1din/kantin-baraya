@@ -6,7 +6,8 @@
         </header>
 
         @if (session('status'))
-            <div class="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-800" role="status">
+            <div class="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-800"
+                role="status">
                 {{ session('status') }}
             </div>
         @endif
@@ -24,20 +25,26 @@
 
         <section class="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
             <h2 class="text-lg font-extrabold text-stone-900">Tambah akun karyawan</h2>
-            <form action="{{ route('owner.users.store') }}" method="POST" class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <form action="{{ route('owner.users.store') }}" method="POST"
+                class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 @csrf
                 <div>
-                    <label for="name" class="mb-2 block text-sm font-semibold text-stone-700">Nama <span class="text-red-600">*</span></label>
-                    <input id="name" name="name" value="{{ old('name') }}" required maxlength="255" autocomplete="name"
+                    <label for="name" class="mb-2 block text-sm font-semibold text-stone-700">Nama <span
+                            class="text-red-600">*</span></label>
+                    <input id="name" name="name" value="{{ old('name') }}" required maxlength="255"
+                        autocomplete="name"
                         class="w-full rounded-xl border border-stone-300 px-4 py-2.5 text-sm outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100">
                 </div>
                 <div>
-                    <label for="email" class="mb-2 block text-sm font-semibold text-stone-700">Email <span class="text-red-600">*</span></label>
-                    <input id="email" name="email" type="email" value="{{ old('email') }}" required maxlength="255" autocomplete="email"
+                    <label for="email" class="mb-2 block text-sm font-semibold text-stone-700">Email <span
+                            class="text-red-600">*</span></label>
+                    <input id="email" name="email" type="email" value="{{ old('email') }}" required
+                        maxlength="255" autocomplete="email"
                         class="w-full rounded-xl border border-stone-300 px-4 py-2.5 text-sm outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100">
                 </div>
                 <div>
-                    <label for="role" class="mb-2 block text-sm font-semibold text-stone-700">Jabatan <span class="text-red-600">*</span></label>
+                    <label for="role" class="mb-2 block text-sm font-semibold text-stone-700">Jabatan <span
+                            class="text-red-600">*</span></label>
                     <select id="role" name="role" required
                         class="w-full rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100">
                         <option value="">Pilih jabatan</option>
@@ -46,17 +53,22 @@
                     </select>
                 </div>
                 <div>
-                    <label for="password" class="mb-2 block text-sm font-semibold text-stone-700">Kata sandi <span class="text-red-600">*</span></label>
-                    <input id="password" name="password" type="password" required minlength="8" autocomplete="new-password"
+                    <label for="password" class="mb-2 block text-sm font-semibold text-stone-700">Kata sandi <span
+                            class="text-red-600">*</span></label>
+                    <input id="password" name="password" type="password" required minlength="8"
+                        autocomplete="new-password"
                         class="w-full rounded-xl border border-stone-300 px-4 py-2.5 text-sm outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100">
                 </div>
                 <div>
-                    <label for="password_confirmation" class="mb-2 block text-sm font-semibold text-stone-700">Ulangi kata sandi <span class="text-red-600">*</span></label>
-                    <input id="password_confirmation" name="password_confirmation" type="password" required minlength="8" autocomplete="new-password"
+                    <label for="password_confirmation" class="mb-2 block text-sm font-semibold text-stone-700">Ulangi
+                        kata sandi <span class="text-red-600">*</span></label>
+                    <input id="password_confirmation" name="password_confirmation" type="password" required
+                        minlength="8" autocomplete="new-password"
                         class="w-full rounded-xl border border-stone-300 px-4 py-2.5 text-sm outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100">
                 </div>
                 <div class="flex items-end">
-                    <button type="submit" class="rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-orange-600">
+                    <button type="submit"
+                        class="rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-orange-600">
                         Tambah akun
                     </button>
                 </div>
@@ -87,7 +99,8 @@
                                     <td class="px-5 py-4 font-bold text-stone-900 sm:px-6">{{ $employee->name }}</td>
                                     <td class="px-5 py-4 text-stone-600">{{ $employee->email }}</td>
                                     <td class="px-5 py-4">
-                                        <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold {{ in_array($employee->role->name, ['cashier', 'kasir'], true) ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800' }}">
+                                        <span
+                                            class="inline-flex rounded-full px-3 py-1 text-xs font-bold {{ in_array($employee->role->name, ['cashier', 'kasir'], true) ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800' }}">
                                             {{ in_array($employee->role->name, ['cashier', 'kasir'], true) ? 'Kasir' : 'Koki' }}
                                         </span>
                                     </td>
@@ -96,7 +109,8 @@
                                             onsubmit="return confirm('Hapus akun karyawan ini?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="font-semibold text-red-600 hover:text-red-700 hover:underline">
+                                            <button type="submit"
+                                                class="font-semibold text-red-600 hover:text-red-700 hover:underline">
                                                 Hapus
                                             </button>
                                         </form>

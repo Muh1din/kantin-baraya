@@ -90,28 +90,30 @@ class DashboardTest extends TestCase
         $response = $this->get(route('owner.dashboard'))
             ->assertOk()
             ->assertViewIs('owner.dashboard')
-            ->assertViewHas('recentOrders', fn ($orders) => $orders->count() === 5);
+            ->assertViewHas('recentOrders', fn($orders) => $orders->count() === 5);
 
-        foreach ([
-            'ORD-OWNER-1',
-            'ORD-OWNER-2',
-            'ORD-OWNER-3',
-            'ORD-OWNER-4',
-            'ORD-OWNER-5',
-            'Menunggu Konfirmasi',
-            'Dikonfirmasi',
-            'Ditolak',
-            'Sedang Dimasak',
-            'Selesai',
-            'Rp10.000',
-        ] as $content) {
+        foreach (
+            [
+                'ORD-OWNER-1',
+                'ORD-OWNER-2',
+                'ORD-OWNER-3',
+                'ORD-OWNER-4',
+                'ORD-OWNER-5',
+                'Menunggu Konfirmasi',
+                'Dikonfirmasi',
+                'Ditolak',
+                'Sedang Dimasak',
+                'Selesai',
+                'Rp10.000',
+            ] as $content
+        ) {
             $response->assertSee($content);
         }
 
         $response->assertDontSee('ORD-OWNER-6');
         $this->assertSame(5, substr_count($response->getContent(), 'ORD-OWNER-'));
         $positions = array_map(
-            fn (int $number): int|false => strpos($response->getContent(), 'ORD-OWNER-' . $number),
+            fn(int $number): int|false => strpos($response->getContent(), 'ORD-OWNER-' . $number),
             range(1, 5),
         );
         $sortedPositions = $positions;

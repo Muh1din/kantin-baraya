@@ -134,7 +134,7 @@ class MenuSalesReportTest extends TestCase
             'end_date' => '2026-11-15',
         ]))
             ->assertOk()
-            ->assertViewHas('menuSales', fn ($rows) => $rows->total() === 1
+            ->assertViewHas('menuSales', fn($rows) => $rows->total() === 1
                 && (int) $rows->first()?->quantity_sold === 3)
             ->assertSee('3 porsi');
 

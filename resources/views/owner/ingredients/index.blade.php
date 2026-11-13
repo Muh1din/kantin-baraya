@@ -234,8 +234,7 @@
                                             class="font-semibold {{ $ingredient->current_stock <= $ingredient->minimum_stock ? 'text-red-700' : 'text-stone-800' }}">{{ $ingredient->current_stock }}</span>
                                         @if ($ingredient->current_stock <= $ingredient->minimum_stock)
                                             <span
-                                                class="ml-2 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-bold text-red-700">Stok
-                                                rendah</span>
+                                                class="ml-2 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-bold text-red-700">Stok rendah</span>
                                         @endif
                                     </td>
                                     <td class="px-5 py-4">{{ $ingredient->minimum_stock }}</td>

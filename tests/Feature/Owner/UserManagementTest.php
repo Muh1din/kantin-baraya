@@ -54,10 +54,12 @@ class UserManagementTest extends TestCase
     {
         $this->actingAs($this->userWithRole('owner', 'owner@kantin.test'));
 
-        foreach ([
-            ['role' => 'cashier', 'email' => 'new-cashier@kantin.test'],
-            ['role' => 'chef', 'email' => 'new-chef@kantin.test'],
-        ] as $account) {
+        foreach (
+            [
+                ['role' => 'cashier', 'email' => 'new-cashier@kantin.test'],
+                ['role' => 'chef', 'email' => 'new-chef@kantin.test'],
+            ] as $account
+        ) {
             $this->post(route('owner.users.store'), [
                 'name' => 'Karyawan Baru',
                 'email' => $account['email'],

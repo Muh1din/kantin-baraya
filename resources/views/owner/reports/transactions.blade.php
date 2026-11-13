@@ -2,14 +2,17 @@
     <div class="space-y-6">
         <header>
             <h1 class="text-xl font-black text-stone-900">Laporan Transaksi</h1>
-            <p class="mt-1 text-sm text-stone-500">Daftar transaksi pesanan beserta informasi pembayaran yang tersimpan.</p>
+            <p class="mt-1 text-sm text-stone-500">Daftar transaksi pesanan beserta informasi pembayaran yang tersimpan.
+            </p>
         </header>
 
         <section class="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
-            <form action="{{ route('owner.reports.transactions') }}" method="GET" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto_auto] lg:items-end">
+            <form action="{{ route('owner.reports.transactions') }}" method="GET"
+                class="grid gap-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto_auto] lg:items-end">
                 <div>
                     <label for="start_date" class="mb-2 block text-sm font-semibold text-stone-700">Dari tanggal</label>
-                    <input id="start_date" name="start_date" type="date" value="{{ $filters['start_date'] }}" required
+                    <input id="start_date" name="start_date" type="date" value="{{ $filters['start_date'] }}"
+                        required
                         class="w-full rounded-xl border border-stone-300 px-4 py-2.5 text-sm outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100">
                 </div>
                 <div>
@@ -18,8 +21,10 @@
                         class="w-full rounded-xl border border-stone-300 px-4 py-2.5 text-sm outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100">
                 </div>
                 <div>
-                    <label for="status" class="mb-2 block text-sm font-semibold text-stone-700">Status Transaksi</label>
-                    <select id="status" name="status" class="w-full rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100">
+                    <label for="status" class="mb-2 block text-sm font-semibold text-stone-700">Status
+                        Transaksi</label>
+                    <select id="status" name="status"
+                        class="w-full rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100">
                         <option value="">Semua status</option>
                         @foreach ($statuses as $status)
                             <option value="{{ $status }}" @selected($filters['status'] === $status)>
@@ -28,8 +33,10 @@
                         @endforeach
                     </select>
                 </div>
-                <button type="submit" class="rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-orange-600">Terapkan</button>
-                <a href="{{ route('owner.reports.transactions') }}" class="rounded-xl border border-stone-300 px-5 py-2.5 text-center text-sm font-semibold text-stone-700 transition hover:bg-stone-50">Reset</a>
+                <button type="submit"
+                    class="rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-orange-600">Terapkan</button>
+                <a href="{{ route('owner.reports.transactions') }}"
+                    class="rounded-xl border border-stone-300 px-5 py-2.5 text-center text-sm font-semibold text-stone-700 transition hover:bg-stone-50">Reset</a>
             </form>
         </section>
 
@@ -37,13 +44,16 @@
             <div class="flex items-center justify-between border-b border-stone-100 px-5 py-4 sm:px-6">
                 <div>
                     <h2 class="font-extrabold text-stone-800">Daftar Transaksi</h2>
-                    <p class="mt-1 text-xs text-stone-500">{{ \Illuminate\Support\Carbon::parse($filters['start_date'])->format('d/m/Y') }} – {{ \Illuminate\Support\Carbon::parse($filters['end_date'])->format('d/m/Y') }}</p>
+                    <p class="mt-1 text-xs text-stone-500">
+                        {{ \Illuminate\Support\Carbon::parse($filters['start_date'])->format('d/m/Y') }} –
+                        {{ \Illuminate\Support\Carbon::parse($filters['end_date'])->format('d/m/Y') }}</p>
                 </div>
                 <span class="text-sm text-stone-500">{{ number_format($orders->total(), 0, ',', '.') }} transaksi</span>
             </div>
 
             @if ($orders->isEmpty())
-                <p class="px-5 py-12 text-center text-sm text-stone-500">Tidak ada transaksi yang sesuai dengan filter.</p>
+                <p class="px-5 py-12 text-center text-sm text-stone-500">Tidak ada transaksi yang sesuai dengan filter.
+                </p>
             @else
                 <div class="overflow-x-auto">
                     <table class="w-full min-w-[1000px] text-left text-sm">
@@ -75,19 +85,25 @@
                                     ];
                                 @endphp
                                 <tr class="transition-colors hover:bg-stone-50/50">
-                                    <td class="whitespace-nowrap px-5 py-4 font-bold text-stone-900 sm:px-6">{{ $order->order_code }}</td>
+                                    <td class="whitespace-nowrap px-5 py-4 font-bold text-stone-900 sm:px-6">
+                                        {{ $order->order_code }}</td>
                                     <td class="px-5 py-4">
                                         <p class="font-semibold text-stone-800">{{ $order->customer_name }}</p>
                                         @if ($order->customer_phone)
                                             <p class="mt-1 text-xs text-stone-500">{{ $order->customer_phone }}</p>
                                         @endif
                                     </td>
-                                    <td class="whitespace-nowrap px-5 py-4 text-stone-600">{{ $order->created_at?->format('d/m/Y H:i') ?? '—' }}</td>
-                                    <td class="whitespace-nowrap px-5 py-4 font-semibold text-stone-900">Rp{{ number_format((float) ($payment?->amount ?? $order->total_amount), 0, ',', '.') }}</td>
+                                    <td class="whitespace-nowrap px-5 py-4 text-stone-600">
+                                        {{ $order->created_at?->format('d/m/Y H:i') ?? '—' }}</td>
+                                    <td class="whitespace-nowrap px-5 py-4 font-semibold text-stone-900">
+                                        Rp{{ number_format((float) ($payment?->amount ?? $order->total_amount), 0, ',', '.') }}
+                                    </td>
                                     <td class="px-5 py-4">
                                         @if ($payment)
-                                            <p class="font-semibold text-stone-800">{{ strtoupper($payment->payment_method) }}</p>
-                                            <p class="mt-1 text-xs {{ $payment->payment_status === 'paid' ? 'text-green-700' : ($payment->payment_status === 'failed' ? 'text-red-700' : 'text-amber-700') }}">
+                                            <p class="font-semibold text-stone-800">
+                                                {{ strtoupper($payment->payment_method) }}</p>
+                                            <p
+                                                class="mt-1 text-xs {{ $payment->payment_status === 'paid' ? 'text-green-700' : ($payment->payment_status === 'failed' ? 'text-red-700' : 'text-amber-700') }}">
                                                 {{ $paymentStatusLabels[$payment->payment_status] ?? ucfirst(str_replace('_', ' ', $payment->payment_status)) }}
                                             </p>
                                         @else
@@ -95,14 +111,15 @@
                                         @endif
                                     </td>
                                     <td class="px-5 py-4 sm:px-6">
-                                        <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold {{ match ($order->order_status) {
-                                            'pending' => 'bg-amber-100 text-amber-800',
-                                            'confirmed' => 'bg-blue-100 text-blue-800',
-                                            'in_progress' => 'bg-orange-100 text-orange-800',
-                                            'completed' => 'bg-green-100 text-green-800',
-                                            'rejected' => 'bg-red-100 text-red-800',
-                                            default => 'bg-stone-100 text-stone-700',
-                                        } }}">
+                                        <span
+                                            class="inline-flex rounded-full px-3 py-1 text-xs font-bold {{ match ($order->order_status) {
+                                                'pending' => 'bg-amber-100 text-amber-800',
+                                                'confirmed' => 'bg-blue-100 text-blue-800',
+                                                'in_progress' => 'bg-orange-100 text-orange-800',
+                                                'completed' => 'bg-green-100 text-green-800',
+                                                'rejected' => 'bg-red-100 text-red-800',
+                                                default => 'bg-stone-100 text-stone-700',
+                                            } }}">
                                             {{ $orderStatusLabels[$order->order_status] ?? ucfirst(str_replace('_', ' ', $order->order_status)) }}
                                         </span>
                                     </td>

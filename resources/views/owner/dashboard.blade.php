@@ -68,7 +68,8 @@
                             Penjualan Hari Ini
                         </p>
 
-                        <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                        <div
+                            class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
 
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -238,7 +239,8 @@
                                     Rp{{ number_format((float) $order->total_amount, 0, ',', '.') }}
                                 </td>
                                 <td class="whitespace-nowrap px-5 py-4">
-                                    <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold {{ $statusColors[$order->order_status] ?? 'bg-stone-100 text-stone-700' }}">
+                                    <span
+                                        class="inline-flex rounded-full px-3 py-1 text-xs font-bold {{ $statusColors[$order->order_status] ?? 'bg-stone-100 text-stone-700' }}">
                                         {{ $statusLabels[$order->order_status] ?? ucfirst(str_replace('_', ' ', $order->order_status)) }}
                                     </span>
                                 </td>

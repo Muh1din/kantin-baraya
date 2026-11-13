@@ -46,10 +46,28 @@
             'label' => 'Inventory',
             'items' => [
                 [
-                    'label' => 'Stok Bahan Baku',
+                    'label' => 'Daftar Bahan Baku',
                     'route' => 'kasir.inventory.index',
-                    'active' => 'kasir.inventory.*',
+                    'active' => 'kasir.inventory.index',
                     'icon' => '▣',
+                ],
+                [
+                    'label' => 'Stok Masuk',
+                    'route' => 'kasir.inventory.stock-in.form',
+                    'active' => 'kasir.inventory.stock-in*',
+                    'icon' => '＋',
+                ],
+                [
+                    'label' => 'Stok Keluar',
+                    'route' => 'kasir.inventory.stock-out.form',
+                    'active' => 'kasir.inventory.stock-out*',
+                    'icon' => '−',
+                ],
+                [
+                    'label' => 'Riwayat Stok',
+                    'route' => 'kasir.inventory.history',
+                    'active' => 'kasir.inventory.history',
+                    'icon' => '↺',
                 ],
             ],
         ],

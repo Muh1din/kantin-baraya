@@ -64,7 +64,7 @@ class TransactionReportTest extends TestCase
         ]))
             ->assertOk()
             ->assertViewIs('owner.reports.transactions')
-            ->assertViewHas('orders', fn ($orders) => $orders->total() === 2)
+            ->assertViewHas('orders', fn($orders) => $orders->total() === 2)
             ->assertSee('ORD-TX-1')
             ->assertSee('Pelanggan Satu')
             ->assertSee('12/11/2026 10:30')
@@ -95,7 +95,7 @@ class TransactionReportTest extends TestCase
             'status' => 'completed',
         ]))
             ->assertOk()
-            ->assertViewHas('orders', fn ($orders) => $orders->total() === 1)
+            ->assertViewHas('orders', fn($orders) => $orders->total() === 1)
             ->assertSee('ORD-INCLUDED')
             ->assertDontSee('ORD-OUTSIDE-DATE')
             ->assertDontSee('ORD-OTHER-STATUS');

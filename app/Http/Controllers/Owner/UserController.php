@@ -19,7 +19,7 @@ class UserController extends Controller
     {
         $users = User::query()
             ->with('role')
-            ->whereHas('role', fn ($query) => $query->whereIn('name', self::EMPLOYEE_ROLES))
+            ->whereHas('role', fn($query) => $query->whereIn('name', self::EMPLOYEE_ROLES))
             ->orderBy('name')
             ->paginate(10);
 
@@ -53,7 +53,7 @@ class UserController extends Controller
     {
         $employee = User::query()
             ->whereKey($user)
-            ->whereHas('role', fn ($query) => $query->whereIn('name', self::EMPLOYEE_ROLES))
+            ->whereHas('role', fn($query) => $query->whereIn('name', self::EMPLOYEE_ROLES))
             ->firstOrFail();
 
         $employee->delete();
