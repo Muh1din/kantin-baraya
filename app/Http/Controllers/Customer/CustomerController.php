@@ -7,6 +7,7 @@ use App\Models\Menu;
 use App\Models\MenuCategory;
 use App\Models\Order;
 use App\Services\VoucherService;
+use App\Services\OperationalSchedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -69,6 +70,10 @@ class CustomerController extends Controller
 
     public function storeOrder(Request $request, VoucherService $voucherService)
     {
+        if (OperationalSchedule::isClosedToday()) {
+            throw ValidationException::withMessages(['order' => 'Kantin sedang libur hari ini dan belum menerima pesanan.']);
+        }
+
         $validated = $request->validate([
             'order_type' => ['required', 'in:bungkus'],
             'payment_method' => ['required', 'in:qris'],
@@ -92,7 +97,9 @@ class CustomerController extends Controller
             }
 
             $subtotal = $menus->sum(fn($item) => $item['menu']->price * $item['quantity']);
-            $voucherApplication = $voucherService->apply($validated['voucher_code'] ?? null, $subtotal);
+            $voucherApplication = blank($validated['voucher_code'] ?? null)
+                ? $voucherService->applyAutomatic($subtotal)
+                : $voucherService->apply($validated['voucher_code'], $subtotal);
             $discountAmount = $voucherApplication['discount_amount'];
             $totalAmount = $voucherApplication['total_amount'];
             $notes = trim(implode("\n", array_filter([
@@ -137,6 +144,7 @@ class CustomerController extends Controller
             'tracking_token' => $order->tracking_token,
             'discount_amount' => $order->discount_amount,
             'voucher_code' => $order->voucher?->code,
+            'voucher_name' => $order->voucher?->name,
             'total_amount' => $order->total_amount,
         ], 201);
     }

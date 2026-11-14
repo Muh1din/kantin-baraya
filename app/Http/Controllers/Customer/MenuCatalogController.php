@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
 use App\Models\MenuCategory;
+use App\Models\Voucher;
+use App\Services\OperationalSchedule;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -36,6 +38,15 @@ class MenuCatalogController extends Controller
             'selectedCategory' => $request->query('kategori', 'all'),
             'searchQuery' => $request->query('search', ''),
             'mode' => $request->query('mode', 'dine-in'),
+            'orderingClosed' => OperationalSchedule::isClosedToday(),
+            'holidayToday' => OperationalSchedule::holidayToday(),
+            'automaticVouchers' => Voucher::query()
+                ->available()
+                ->where('discount_type', 'percentage')
+                ->withCount('orders')
+                ->get()
+                ->filter(fn (Voucher $voucher) => $voucher->usage_limit === null || $voucher->orders_count < $voucher->usage_limit)
+                ->values(),
         ]);
     }
 }

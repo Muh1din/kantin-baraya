@@ -26,7 +26,7 @@
             <div>
                 <p class="text-sm font-bold uppercase tracking-wide text-orange-100">Saldo poin</p>
                 <p class="mt-1 text-3xl font-black">{{ number_format($account->saldo_poin, 0, ',', '.') }} poin</p>
-                <p class="mt-2 text-sm text-orange-50">Dapatkan 1 poin untuk setiap Rp1.000 pada pembayaran pesanan terdaftar yang telah diverifikasi Kasir.</p>
+                <p class="mt-2 text-sm text-orange-50">Poin dari setiap menu yang dibeli ditentukan owner dan ditambahkan setelah pembayaran diverifikasi Kasir.</p>
             </div>
             <span class="text-4xl" aria-hidden="true">⭐</span>
         </section>

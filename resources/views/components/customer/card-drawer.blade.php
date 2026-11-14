@@ -32,6 +32,10 @@
                 <span>Subtotal</span>
                 <span id="cartSubtotal">Rp0</span>
             </div>
+            <div id="cartDiscountRow" class="mt-1 hidden items-center justify-between text-sm font-semibold text-green-700">
+                <span id="cartDiscountLabel">Diskon otomatis</span>
+                <span id="cartDiscount">-Rp0</span>
+            </div>
 
             <div class="mt-2 flex items-center justify-between">
                 <span class="font-extrabold">Total</span>
@@ -193,7 +197,7 @@
                 <input type="text" id="voucherCode" name="voucher_code" maxlength="50" autocomplete="off"
                     autocapitalize="characters" placeholder="Masukkan kode voucher"
                     class="w-full rounded-xl border border-stone-300 px-4 py-3 uppercase outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-100">
-                <p class="mt-1 text-xs text-stone-500">Voucher akan divalidasi saat pesanan dibuat.</p>
+                <p class="mt-1 text-xs text-stone-500">Diskon persentase aktif diterapkan otomatis. Jika memasukkan kode di sini, voucher otomatis akan diganti oleh voucher tersebut.</p>
             </div>
 
             {{-- Total --}}

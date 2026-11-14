@@ -1,9 +1,21 @@
 <x-layouts.home>
+    @php($orderingClosed = \App\Services\OperationalSchedule::isClosedToday())
+    @php($holidayToday = \App\Services\OperationalSchedule::holidayToday())
     <x-home.hero />
     <x-home.info-strip />
 
     <section id="menu" class="px-4 pb-12 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-7xl">
+            @if ($orderingClosed)
+                <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800" role="status">
+                    <p class="font-bold">{{ $holidayToday?->name ?? 'Kantin sedang libur hari ini' }}</p>
+                    @if ($holidayToday?->notes)
+                        <p class="mt-1">{{ $holidayToday->notes }}</p>
+                    @else
+                        <p class="mt-1">Pemesanan sementara tidak tersedia.</p>
+                    @endif
+                </div>
+            @endif
 
             {{-- HEADER --}}
             <div class="mb-7 flex flex-wrap items-end justify-between gap-4">
@@ -164,7 +176,12 @@
 
                                 {{-- ADD TO CART --}}
                                 <div class="mt-5 pb-1">
-                                    @if ($menu->is_available && $menu->stock > 0)
+                                    @if ($orderingClosed)
+                                        <button type="button" disabled aria-disabled="true" title="Kantin sedang libur hari ini"
+                                            class="w-full cursor-not-allowed rounded-xl bg-stone-100 px-2 py-2.5 text-[10px] font-bold text-stone-400 sm:text-xs">
+                                            Kantin Libur
+                                        </button>
+                                    @elseif ($menu->is_available && $menu->stock > 0)
                                         <button type="button" data-action="add" data-id="{{ $menu->id }}"
                                             class="add-to-cart-button w-full rounded-xl {{ $inCart > 0 ? 'bg-orange-50 text-orange-600' : 'bg-orange-500 text-white' }} px-2 py-2.5 text-[10px] font-extrabold transition duration-200 hover:bg-orange-600 hover:text-white active:scale-95 sm:text-xs">
                                             @if ($inCart > 0)

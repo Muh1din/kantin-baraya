@@ -1,7 +1,6 @@
 <x-layouts.cashier title="Data Pelanggan">
     <div class="space-y-6">
         <header>
-            <h1 class="text-xl font-black text-stone-900">Data Pelanggan</h1>
             <p class="mt-1 text-sm text-stone-500">Daftar akun pelanggan terdaftar dan ringkasan transaksinya.</p>
         </header>
 

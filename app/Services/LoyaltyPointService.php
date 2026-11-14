@@ -10,8 +10,6 @@ use App\Notifications\CustomerActivityNotification;
 
 class LoyaltyPointService
 {
-    public const RUPIAH_PER_POINT = 1000;
-
     /** Award points for a paid, registered-customer order. Call inside its payment transaction. */
     public function awardForPaidOrder(Order $order): int
     {
@@ -28,7 +26,10 @@ class LoyaltyPointService
             return 0;
         }
 
-        $points = intdiv((int) round((float) $order->total_amount), self::RUPIAH_PER_POINT);
+        $points = $order->items()
+            ->with('menu')
+            ->get()
+            ->sum(fn ($item) => (int) ($item->menu?->points_per_item ?? 0) * (int) $item->quantity);
         if ($points < 1) {
             return 0;
         }

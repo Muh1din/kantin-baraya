@@ -1,7 +1,6 @@
 <x-layouts.cashier title="Penjualan Menu">
     <div class="space-y-6">
         <header>
-            <h1 class="text-xl font-black text-stone-900">Penjualan Menu</h1>
             <p class="mt-1 text-sm text-stone-500">Jumlah terjual dan pendapatan menu dari transaksi dengan pembayaran berhasil.</p>
         </header>
 

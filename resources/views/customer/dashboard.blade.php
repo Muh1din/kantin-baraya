@@ -161,7 +161,7 @@
                     </h2>
 
                     <p class="mt-1 text-sm text-stone-500">
-                        Dapatkan 1 poin per Rp1.000 pada pembayaran terverifikasi, lalu tukarkan dengan menu gratis.
+                        Dapatkan poin untuk setiap menu yang dibeli. Jumlah poin per menu ditentukan oleh owner dan diberikan setelah pembayaran terverifikasi.
                     </p>
                 </div>
 

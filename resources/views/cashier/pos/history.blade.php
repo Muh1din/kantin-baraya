@@ -5,7 +5,6 @@
                 class="flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-gradient-to-br from-orange-500 via-orange-500 to-amber-400 p-6 text-white shadow-lg">
                 <div>
                     <p class="text-sm font-semibold text-white/80">Kantin Baraya</p>
-                    <h1 class="mt-1 text-3xl font-black">Riwayat Transaksi</h1>
                     <p class="mt-1 text-sm">Transaksi yang dibuat oleh akun kasir ini.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">@include('cashier.pos._navigation')<form

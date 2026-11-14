@@ -4,10 +4,6 @@
 
         {{-- Page Heading --}}
         <div>
-            <h1 class="text-2xl font-bold text-typography-heading">
-                Pesanan Berjalan
-            </h1>
-
             <p class="mt-1 text-sm text-gray-500">
                 Pantau pesanan yang sedang menunggu diproses dan sedang dimasak oleh koki.
             </p>

@@ -15,6 +15,9 @@ function initializeCart() {
     const cartCount = document.getElementById("cartCount");
     const cartSubtotal = document.getElementById("cartSubtotal");
     const cartTotal = document.getElementById("cartTotal");
+    const cartDiscountRow = document.getElementById("cartDiscountRow");
+    const cartDiscountLabel = document.getElementById("cartDiscountLabel");
+    const cartDiscount = document.getElementById("cartDiscount");
     const checkoutButton = document.getElementById("checkoutButton");
 
     // ========================================
@@ -25,6 +28,7 @@ function initializeCart() {
     const closeCheckout = document.getElementById("closeCheckout");
     const checkoutForm = document.getElementById("checkoutForm");
     const checkoutTotal = document.getElementById("checkoutTotal");
+    const voucherCodeInput = document.getElementById("voucherCode");
 
     const customerName = document.getElementById("customerName");
     const customerPhone = document.getElementById("customerPhone");
@@ -73,6 +77,13 @@ function initializeCart() {
 
     let cart = readCart();
     let closeTimer;
+    let automaticVouchers = [];
+    try {
+        const encodedVouchers = document.querySelector("#menu")?.dataset.autoVouchers;
+        if (encodedVouchers) automaticVouchers = JSON.parse(atob(encodedVouchers));
+    } catch {
+        automaticVouchers = [];
+    }
 
     // ========================================
     // 5. LOCAL STORAGE
@@ -128,6 +139,17 @@ function initializeCart() {
         );
     }
 
+    function automaticDiscountFor(subtotal) {
+        const voucher = automaticVouchers
+            .filter((item) => Number(item.minimum) <= subtotal)
+            .sort((a, b) => Number(b.percent) - Number(a.percent))[0];
+        if (!voucher) return { voucher: null, amount: 0 };
+        return {
+            voucher,
+            amount: Math.min(subtotal, Math.round(subtotal * Number(voucher.percent)) / 100),
+        };
+    }
+
     // ========================================
     // 7. UPDATE TOMBOL MENU
     // ========================================
@@ -180,6 +202,8 @@ function initializeCart() {
         const entries = Object.entries(cart);
         const quantity = totalQuantity();
         const subtotal = calculateSubtotal();
+        const promotion = automaticDiscountFor(subtotal);
+        const total = Math.max(0, subtotal - promotion.amount);
 
         if (entries.length === 0) {
             const emptyState = document.createElement("div");
@@ -273,7 +297,16 @@ function initializeCart() {
         }
 
         if (cartTotal) {
-            cartTotal.textContent = formatPrice(subtotal);
+            cartTotal.textContent = formatPrice(total);
+        }
+
+        if (cartDiscountRow && cartDiscount) {
+            cartDiscountRow.classList.toggle("hidden", promotion.amount <= 0);
+            cartDiscountRow.classList.toggle("flex", promotion.amount > 0);
+            cartDiscount.textContent = `-${formatPrice(promotion.amount)}`;
+            if (cartDiscountLabel && promotion.voucher) {
+                cartDiscountLabel.textContent = `Diskon otomatis ${promotion.voucher.percent}%`;
+            }
         }
 
         if (checkoutButton) {
@@ -382,7 +415,11 @@ function initializeCart() {
             return;
         }
 
-        checkoutTotal.textContent = formatPrice(calculateSubtotal());
+        const subtotal = calculateSubtotal();
+        const previewDiscount = voucherCodeInput?.value.trim()
+            ? 0
+            : automaticDiscountFor(subtotal).amount;
+        checkoutTotal.textContent = formatPrice(Math.max(0, subtotal - previewDiscount));
 
         updateCheckoutOptions();
 
@@ -514,7 +551,7 @@ function initializeCart() {
             const discountAmount = Number(result.discount_amount ?? 0);
             if (qrisDiscount) {
                 if (discountAmount > 0) {
-                    qrisDiscount.textContent = `Voucher ${result.voucher_code}: -${formatPrice(discountAmount)}`;
+                    qrisDiscount.textContent = `${result.voucher_name || `Voucher ${result.voucher_code}`}: -${formatPrice(discountAmount)}`;
                     qrisDiscount.classList.remove("hidden");
                 } else {
                     qrisDiscount.textContent = "";

@@ -123,6 +123,20 @@
                    lg:px-4 lg:pt-4 lg:opacity-100
                    lg:shadow-none">
 
+            {{-- @php($nextHoliday = \App\Services\OperationalSchedule::nextHoliday())
+            @if ($nextHoliday)
+                <section class="mx-1 mb-3 rounded-xl border border-amber-200 bg-amber-50 p-3" aria-label="Informasi hari libur">
+                    <p class="text-xs font-black text-amber-900">
+                        {{ $nextHoliday->holiday_date->isToday() ? 'Kantin libur hari ini' : 'Info hari libur berikutnya' }}
+                    </p>
+                    <p class="mt-1 text-xs font-semibold text-amber-800">{{ $nextHoliday->holiday_date->translatedFormat('d M Y') }}</p>
+                    <p class="mt-1 text-sm font-bold text-amber-800">{{ $nextHoliday->name }}</p>
+                    @if ($nextHoliday->notes)
+                        <p class="mt-1 text-xs leading-5 text-amber-800">{{ $nextHoliday->notes }}</p>
+                    @endif
+                </section>
+            @endif --}}
+
             {{-- 1. BERANDA --}}
             <a href="{{ route('customer.dashboard') }}" @class([
                 'flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm lg:w-full',

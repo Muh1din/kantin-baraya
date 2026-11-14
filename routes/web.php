@@ -16,6 +16,7 @@ use App\Http\Controllers\Owner\HolidayController;
 use App\Http\Controllers\Owner\CustomerController as OwnerCustomerController;
 use App\Http\Controllers\Owner\VoucherController;
 use App\Http\Controllers\Owner\RewardController;
+use App\Http\Controllers\Owner\MenuLoyaltyPointController;
 use App\Http\Controllers\Cashier\CashierDashboardController;
 use App\Http\Controllers\Cashier\CustomerController as CashierCustomerController;
 use App\Http\Controllers\Cashier\TransactionReportController;
@@ -88,6 +89,8 @@ Route::prefix('owner')
         Route::get('/rewards/{reward}/edit', [RewardController::class, 'edit'])->name('rewards.edit');
         Route::put('/rewards/{reward}', [RewardController::class, 'update'])->name('rewards.update');
         Route::delete('/rewards/{reward}', [RewardController::class, 'destroy'])->name('rewards.destroy');
+        Route::get('/rewards/menu-points', [MenuLoyaltyPointController::class, 'index'])->name('rewards.menu-points.index');
+        Route::put('/rewards/menu-points/settings', [MenuLoyaltyPointController::class, 'update'])->name('rewards.menu-points.update');
 
         // Operational hours and holidays
         Route::get('/operational-hours', [OperationalHourController::class, 'index'])->name('operational-hours.index');

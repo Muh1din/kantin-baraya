@@ -4,10 +4,6 @@
 
         {{-- PAGE HEADER --}}
         <div>
-            <h1 class="text-2xl font-black text-typography-heading">
-                Dashboard
-            </h1>
-
             <p class="mt-1 text-sm text-stone-500">
                 Selamat datang, {{ auth()->user()->name }}.
                 Berikut ringkasan aktivitas Kantin Baraya hari ini.

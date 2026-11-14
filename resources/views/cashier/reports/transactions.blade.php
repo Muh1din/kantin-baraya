@@ -1,7 +1,6 @@
 <x-layouts.cashier title="Laporan Transaksi">
     <div class="space-y-6">
         <header>
-            <h1 class="text-xl font-black text-stone-900">Laporan Transaksi</h1>
             <p class="mt-1 text-sm text-stone-500">Daftar pesanan dan pembayaran yang tersimpan. Setiap pesanan ditampilkan satu kali.</p>
         </header>
 

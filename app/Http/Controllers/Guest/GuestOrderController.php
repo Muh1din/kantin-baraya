@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Menu;
 use App\Models\Order;
 use App\Services\VoucherService;
+use App\Services\OperationalSchedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -15,6 +16,10 @@ class GuestOrderController extends Controller
 {
     public function store(Request $request, VoucherService $voucherService)
     {
+        if (OperationalSchedule::isClosedToday()) {
+            throw ValidationException::withMessages(['order' => 'Kantin sedang libur hari ini dan belum menerima pesanan.']);
+        }
+
         $validated = $request->validate([
             'customer_name' => ['required', 'string', 'max:255'],
             'customer_phone' => ['nullable', 'string', 'max:30'],

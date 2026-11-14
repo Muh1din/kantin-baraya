@@ -2,7 +2,7 @@
     <div class="space-y-6">
         <header>
             <h1 class="text-xl font-black text-stone-900">Voucher Diskon</h1>
-            <p class="mt-1 text-sm text-stone-500">Buat dan atur voucher yang dapat digunakan pada pesanan online.</p>
+            <p class="mt-1 text-sm text-stone-500">Voucher persentase aktif diterapkan otomatis pada katalog customer. Voucher potongan nominal tetap digunakan dengan memasukkan kode saat checkout.</p>
         </header>
 
         @if (session('status'))

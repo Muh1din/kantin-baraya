@@ -1,7 +1,49 @@
 <x-layouts.customer title="Katalog menu">
-    <section id="menu" class="px-4 pb-12 sm:px-6 lg:px-8">
+    @php
+        $headerVoucher = collect($automaticVouchers ?? [])->sortByDesc('discount_value')->first();
+    @endphp
+
+    <section id="menu" class="px-4 pb-12 sm:px-6 lg:px-8"
+        data-auto-vouchers="{{ base64_encode(
+            collect($automaticVouchers ?? [])->map(
+                    fn($voucher) => [
+                        'name' => $voucher->name,
+                        'code' => $voucher->code,
+                        'percent' => (float) $voucher->discount_value,
+                        'minimum' => (float) $voucher->minimum_order,
+                    ],
+                )->values()->toJson(),
+        ) }}">
 
         {{-- HEADER --}}
+        @if ($orderingClosed ?? false)
+            <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+                role="status">
+                <p class="font-bold">
+                    {{ $holidayToday?->name ?? 'Kantin sedang libur hari ini' }}
+                </p>
+
+                @if ($holidayToday?->notes)
+                    <p class="mt-1">{{ $holidayToday->notes }}</p>
+                @else
+                    <p class="mt-1">Pemesanan sementara tidak tersedia.</p>
+                @endif
+            </div>
+        @endif
+
+        @if ($headerVoucher)
+            <div class="mb-6 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-900"
+                role="status">
+                <p class="font-bold">
+                    Ada voucher diskon {{ rtrim(rtrim(number_format((float) $headerVoucher->discount_value, 2, ',', '.'), '0'), ',') }}%!
+                </p>
+                <p class="mt-1">
+                    Minimum belanja Rp{{ number_format((float) $headerVoucher->minimum_order, 0, ',', '.') }}.
+                    Diskon otomatis diterapkan saat checkout.
+                </p>
+            </div>
+        @endif
+
         <div class="mb-7 flex flex-wrap items-end justify-between gap-4">
             <div>
                 <p class="text-xs font-black tracking-[.2em] text-orange-500">
@@ -23,6 +65,7 @@
         </div>
 
         @if ($menus->isEmpty())
+
             {{-- EMPTY STATE --}}
             <div class="rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-12 text-center">
                 <p class="text-lg font-bold text-stone-800">
@@ -36,6 +79,7 @@
         @else
             {{-- SEARCH & SORT --}}
             <div class="mb-5 flex flex-col gap-3 sm:flex-row">
+
                 <div class="relative flex-1">
                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-lg text-stone-400">
                         ⌕
@@ -53,19 +97,18 @@
                     <option value="high">Harga tertinggi</option>
                     <option value="name">Nama A–Z</option>
                 </select>
+
             </div>
 
             {{-- CATEGORY FILTER --}}
             <div id="categories" class="hide-scrollbar flex gap-2 overflow-x-auto">
 
-                {{-- SEMUA KATEGORI --}}
                 <button type="button" aria-pressed="true"
                     class="category-btn active shrink-0 rounded-full border border-orange-200 px-5 py-2.5 text-xs font-bold"
                     data-category="all">
                     Semua
                 </button>
 
-                {{-- KATEGORI DARI DATABASE --}}
                 @foreach ($categories as $category)
                     <button type="button" aria-pressed="false"
                         class="category-btn shrink-0 rounded-full border border-stone-200 bg-white px-5 py-2.5 text-xs font-bold"
@@ -93,16 +136,19 @@
             {{-- SERVER-RENDERED MENU GRID --}}
             <div
                 class="mt-6 grid grid-cols-2 items-stretch gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+
                 @foreach ($menus as $menu)
                     @php
                         $cart = session('cart', []);
                         $inCart = $cart[$menu->id]['quantity'] ?? 0;
+
                         $category = $menu->menuCategory->name ?? ($menu->category ?? 'Umum');
+
                         $image = $menu->image ? asset('storage/' . $menu->image) : null;
                     @endphp
 
                     <article
-                        class="product-card flex h-[410px] min-w-0 flex-col overflow-hidden rounded-2xl border border-stone-100 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-orange-200 hover:shadow-lg sm:rounded-3xl"
+                        class="product-card flex min-h-[410px] min-w-0 flex-col overflow-hidden rounded-2xl border border-stone-100 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-orange-200 hover:shadow-lg sm:rounded-3xl"
                         data-product-id="{{ $menu->id }}"
                         data-category="{{ \Illuminate\Support\Str::slug($category) }}"
                         data-menu-name="{{ $menu->name }}" data-price="{{ $menu->price }}"
@@ -111,10 +157,11 @@
                         {{-- THUMBNAIL --}}
                         <button type="button" data-action="detail" data-id="{{ $menu->id }}"
                             class="relative block h-44 w-full shrink-0 overflow-hidden bg-stone-100 text-left">
+
                             @if ($image)
                                 <img src="{{ $image }}" alt="{{ $menu->name }}" loading="lazy"
                                     class="h-full w-full object-cover transition duration-300 hover:scale-105"
-                                    onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('grid','place-items-center');this.insertAdjacentHTML('beforeend','<span class="text-5xl">🍽️</span>')">
+                                    onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('grid','place-items-center');this.insertAdjacentHTML('beforeend','<span class=&quot;text-5xl&quot;>🍽️</span>')">
                             @else
                                 <div class="grid h-full w-full place-items-center bg-stone-100">
                                     <span class="text-5xl">🍽️</span>
@@ -138,6 +185,7 @@
 
                         {{-- CONTENT BODY --}}
                         <div class="flex min-h-0 flex-1 flex-col p-3">
+
                             <p class="truncate text-[9px] font-bold uppercase tracking-wider text-stone-400">
                                 {{ $category }}
                             </p>
@@ -159,8 +207,15 @@
                             </div>
 
                             {{-- ADD TO CART --}}
-                            <div class="mt-5 pb-1">
-                                @if ($menu->is_available && $menu->stock > 0)
+                            <div class="mt-auto pt-5 pb-1">
+
+                                @if ($orderingClosed ?? false)
+                                    <button type="button" disabled aria-disabled="true"
+                                        title="Kantin sedang libur hari ini"
+                                        class="w-full cursor-not-allowed rounded-xl bg-stone-100 px-2 py-2.5 text-[10px] font-bold text-stone-400 sm:text-xs">
+                                        Kantin Libur
+                                    </button>
+                                @elseif ($menu->is_available && $menu->stock > 0)
                                     <button type="button" data-action="add" data-id="{{ $menu->id }}"
                                         class="add-to-cart-button w-full rounded-xl {{ $inCart > 0 ? 'bg-orange-50 text-orange-600' : 'bg-orange-500 text-white' }} px-2 py-2.5 text-[10px] font-extrabold transition duration-200 hover:bg-orange-600 hover:text-white active:scale-95 sm:text-xs">
                                         @if ($inCart > 0)
@@ -175,14 +230,20 @@
                                         Tidak Tersedia
                                     </button>
                                 @endif
+
                             </div>
+
                         </div>
+
                     </article>
                 @endforeach
+
             </div>
+
         @endif
-        </div>
+
     </section>
 
     <x-customer.card-drawer />
+
 </x-layouts.customer>

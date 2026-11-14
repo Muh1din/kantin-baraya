@@ -230,15 +230,21 @@
             <a href="{{ \Illuminate\Support\Facades\Route::has('owner.rewards.index') ? route('owner.rewards.index') : '#' }}"
                 @class([
                     'flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm lg:w-full',
-                    'bg-orange-50 font-bold text-orange-700' => request()->routeIs(
-                        'owner.rewards.*'),
-                    'font-semibold text-stone-600 transition hover:bg-stone-50 hover:text-orange-700' => !request()->routeIs(
-                        'owner.rewards.*'),
+                    'bg-orange-50 font-bold text-orange-700' => request()->routeIs('owner.rewards.*') && !request()->routeIs('owner.rewards.menu-points.*'),
+                    'font-semibold text-stone-600 transition hover:bg-stone-50 hover:text-orange-700' => !request()->routeIs('owner.rewards.*') || request()->routeIs('owner.rewards.menu-points.*'),
                 ]) @click="mobileNavOpen = false">
                 <span aria-hidden="true">☆</span>
                 Reward & Penukaran Poin
             </a>
 
+            <a href="{{ route('owner.rewards.menu-points.index') }}" @class([
+                'flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm lg:w-full',
+                'bg-orange-50 font-bold text-orange-700' => request()->routeIs('owner.rewards.menu-points.*'),
+                'font-semibold text-stone-600 transition hover:bg-stone-50 hover:text-orange-700' => !request()->routeIs('owner.rewards.menu-points.*'),
+            ]) @click="mobileNavOpen = false">
+                <span aria-hidden="true">★</span>
+                Atur Poin per Menu
+            </a>
 
             {{-- 5. MANAJEMEN KARYAWAN --}}
             <div class="mt-4 px-4 text-[10px] font-bold uppercase tracking-wider text-stone-400">

@@ -14,6 +14,7 @@ class Menu extends Model
         'category_id',
         'category',
         'price',
+        'points_per_item',
         'image',
         'stock',
         'is_available',
@@ -23,6 +24,7 @@ class Menu extends Model
     {
         return [
             'price' => 'integer',
+            'points_per_item' => 'integer',
             'stock' => 'integer',
             'is_available' => 'boolean',
         ];
