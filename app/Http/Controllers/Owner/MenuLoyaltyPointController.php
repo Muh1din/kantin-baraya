@@ -14,20 +14,26 @@ class MenuLoyaltyPointController extends Controller
     public function index(): View
     {
         return view('owner.rewards.menu-points', [
-            'menus' => Menu::query()->orderBy('name')->get(),
+            'menus' => Menu::query()
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 
     public function update(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'points' => ['array'],
-            'points.*' => ['integer', 'min:0', 'max:1000000'],
+            'points' => ['sometimes', 'array'],
+            'points.*' => ['nullable', 'integer', 'min:0', 'max:1000000'],
         ]);
 
         DB::transaction(function () use ($validated): void {
-            foreach ($validated['points'] as $menuId => $points) {
-                Menu::query()->whereKey($menuId)->update(['points_per_item' => $points]);
+            foreach ($validated['points'] ?? [] as $menuId => $points) {
+                Menu::query()
+                    ->whereKey($menuId)
+                    ->update([
+                        'points_per_item' => $points ?: 0,
+                    ]);
             }
         });
 
