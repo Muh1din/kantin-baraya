@@ -33,8 +33,9 @@ class AuthController extends Controller
 
         Auth::login($user);
         $request->session()->regenerate();
+        $user->sendEmailVerificationNotification();
 
-        return redirect()->route('customer.dashboard');
+        return redirect()->route('verification.notice');
     }
 
     /**
@@ -89,6 +90,10 @@ class AuthController extends Controller
 
         // 4. Ambil role pengguna
         $dashboardRoute = $this->dashboardRoute($request->user()->role?->name);
+
+        if ($request->user()->role?->name === 'customer' && ! $request->user()->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice');
+        }
 
         // 6. Tolak akun yang tidak memiliki role yang diizinkan
         if ($dashboardRoute === null) {

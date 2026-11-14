@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Owner\TableController;
@@ -50,6 +52,20 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [AuthController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
+
+Route::get('/email/verify', fn () => view('auth.verify-email'))
+    ->middleware('auth')
+    ->name('verification.notice');
+
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+    return redirect()->route('customer.dashboard')->with('status', 'Alamat email berhasil diverifikasi.');
+})->middleware(['auth', 'signed', 'throttle:6,1'])->name('verification.verify');
+
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+    return back()->with('status', 'Link verifikasi baru telah dikirim.');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
 
 // OWNER
@@ -235,7 +251,7 @@ Route::prefix('chef')
 // CUSTOMER
 Route::prefix('customer')
     ->name('customer.')
-    ->middleware(['auth', 'role:customer'])
+    ->middleware(['auth', 'role:customer', 'verified'])
     ->group(function () {
 
         Route::get('/dashboard', [CustomerController::class, 'index'])
