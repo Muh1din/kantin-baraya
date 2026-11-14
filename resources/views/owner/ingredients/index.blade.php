@@ -274,7 +274,7 @@
                 <p class="px-5 py-10 text-center text-sm text-stone-500">Belum ada riwayat pergerakan stok.</p>
             @else
                 <div class="overflow-x-auto">
-                    <table class="w-full min-w-[760px] text-left text-sm">
+                    <table class="w-full min-w-[900px] text-left text-sm">
                         <thead class="bg-stone-50 text-xs font-semibold uppercase tracking-wider text-stone-500">
                             <tr>
                                 <th scope="col" class="px-5 py-3.5 sm:px-6">Waktu</th>
@@ -282,6 +282,7 @@
                                 <th scope="col" class="px-5 py-3.5">Jenis</th>
                                 <th scope="col" class="px-5 py-3.5">Perubahan</th>
                                 <th scope="col" class="px-5 py-3.5">Saldo Setelah</th>
+                                <th scope="col" class="px-5 py-3.5">Pesanan</th>
                                 <th scope="col" class="px-5 py-3.5">Catatan</th>
                             </tr>
                         </thead>
@@ -308,6 +309,7 @@
                                         {{ $movement->quantity_change > 0 ? '+' . $movement->quantity_change : $movement->quantity_change }}
                                     </td>
                                     <td class="px-5 py-4 font-medium text-stone-900">{{ $movement->stock_after }}</td>
+                                    <td class="px-5 py-4 font-semibold text-orange-700">{{ $movement->order?->order_code ?? '—' }}</td>
                                     <td class="px-5 py-4 text-stone-600">{{ $movement->notes ?: '—' }}</td>
                                 </tr>
                             @endforeach

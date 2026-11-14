@@ -189,17 +189,6 @@
                     class="w-full resize-none rounded-xl border border-stone-300 px-4 py-3 outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-100"></textarea>
             </div>
 
-            {{-- Voucher Diskon --}}
-            <div>
-                <label for="voucherCode" class="mb-2 block text-sm font-semibold text-stone-700">
-                    Kode Voucher <span class="font-normal text-stone-400">(Opsional)</span>
-                </label>
-                <input type="text" id="voucherCode" name="voucher_code" maxlength="50" autocomplete="off"
-                    autocapitalize="characters" placeholder="Masukkan kode voucher"
-                    class="w-full rounded-xl border border-stone-300 px-4 py-3 uppercase outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-100">
-                <p class="mt-1 text-xs text-stone-500">Diskon persentase aktif diterapkan otomatis. Jika memasukkan kode di sini, voucher otomatis akan diganti oleh voucher tersebut.</p>
-            </div>
-
             {{-- Total --}}
             <div class="rounded-xl bg-stone-50 p-4">
                 <div class="flex items-center justify-between gap-4">
@@ -282,7 +271,7 @@
                     </p>
                 </div>
 
-                <img id="qrisImage" alt="Kode QRIS pembayaran"
+                <img id="qrisImage" @if ($qrisImageUrl) src="{{ $qrisImageUrl }}" @endif alt="Kode QRIS pembayaran"
                     class="mx-auto hidden max-h-64 w-full max-w-64 object-contain">
 
                 <button type="button" id="downloadQris" disabled

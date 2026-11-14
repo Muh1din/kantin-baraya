@@ -17,6 +17,7 @@ use App\Http\Controllers\Owner\CustomerController as OwnerCustomerController;
 use App\Http\Controllers\Owner\VoucherController;
 use App\Http\Controllers\Owner\RewardController;
 use App\Http\Controllers\Owner\MenuLoyaltyPointController;
+use App\Http\Controllers\Owner\QrisSettingController;
 use App\Http\Controllers\Cashier\CashierDashboardController;
 use App\Http\Controllers\Cashier\CustomerController as CashierCustomerController;
 use App\Http\Controllers\Cashier\TransactionReportController;
@@ -34,12 +35,6 @@ use App\Http\Controllers\Guest\GuestOrderController;
 use App\Http\Controllers\Owner\DashboardController as OwnerDashboardController;
 
 // PUBLIC & AUTHENTICATION
-
-// Route::get('/', [HomeController::class, 'index'])
-//     ->name('home');
-
-// Route::get('/menu/{token}', [HomeController::class, 'tableMenu'])
-//     ->name('menu.table');
 
 Route::middleware('guest')->group(function () {
     Route::get('/', [AuthController::class, 'index'])
@@ -66,6 +61,10 @@ Route::prefix('owner')
 
         Route::get('/dashboard', [OwnerDashboardController::class, 'index'])
             ->name('dashboard');
+
+        Route::get('/qris', [QrisSettingController::class, 'index'])->name('qris.index');
+        Route::post('/qris', [QrisSettingController::class, 'update'])->name('qris.update');
+        Route::delete('/qris', [QrisSettingController::class, 'destroy'])->name('qris.destroy');
 
         // Employee account management
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
@@ -123,21 +122,6 @@ Route::prefix('owner')
         Route::get('/menus/{menu}/edit', [MenuController::class, 'edit'])->name('menus.edit');
         Route::put('/menus/{menu}', [MenuController::class, 'update'])->name('menus.update');
         Route::patch('/menus/{menu}/status', [MenuController::class, 'toggleStatus'])->name('menus.toggle-status');
-
-        // Recipes
-        Route::get('/recipes', [RecipeController::class, 'index'])->name('recipes.index');
-        Route::get('/recipes/{menu}', [RecipeController::class, 'show'])->name('recipes.show');
-        Route::post('/recipes/{menu}/ingredients', [RecipeController::class, 'storeIngredients'])->name('recipes.ingredients.store');
-        Route::put('/recipes/{menu}/ingredients/{menuIngredient}', [RecipeController::class, 'updateQuantity'])->name('recipes.ingredients.update');
-        Route::delete('/recipes/{menu}/ingredients/{menuIngredient}', [RecipeController::class, 'destroyIngredient'])->name('recipes.ingredients.destroy');
-
-        // Tables & QR
-        Route::get('/tables', [TableController::class, 'index'])->name('tables.index');
-        Route::post('/tables', [TableController::class, 'store'])->name('tables.store');
-        Route::put('/tables/{table}', [TableController::class, 'update'])->name('tables.update');
-        Route::patch('/tables/{table}/status', [TableController::class, 'toggleStatus'])->name('tables.toggle-status');
-        Route::get('/tables/{table}/qr/download', [TableController::class, 'downloadQr'])->name('tables.qr.download');
-        Route::get('/tables/{table}/qr', [TableController::class, 'generateQr'])->name('tables.qr');
 
         // Ingredients & Stock
         Route::get('/ingredients', [IngredientController::class, 'index'])->name('ingredients.index');
@@ -222,6 +206,9 @@ Route::prefix('chef')
         Route::post('/orders/{order}/start', [ChefDashboardController::class, 'startCooking'])
             ->name('orders.start');
 
+        Route::post('/orders/{order}/cancel', [ChefDashboardController::class, 'cancelCooking'])
+            ->name('orders.cancel');
+
         Route::post('/orders/{order}/complete', [ChefDashboardController::class, 'complete'])
             ->name('orders.complete');
 
@@ -263,18 +250,5 @@ Route::prefix('customer')
 
         Route::post('/orders', [CustomerController::class, 'storeOrder'])->name('orders.store');
         Route::post('/orders/{token}/payment-proof', [CustomerController::class, 'uploadPaymentProof'])
-            ->name('orders.payment-proof');
-    });
-
-
-// GUEST
-Route::prefix('guest')
-    ->name('guest.')
-    ->group(function () {
-
-        Route::post('/orders', [GuestOrderController::class, 'store'])
-            ->name('orders.store');
-
-        Route::post('/orders/{token}/payment-proof', [GuestOrderController::class, 'uploadPaymentProof'])
             ->name('orders.payment-proof');
     });

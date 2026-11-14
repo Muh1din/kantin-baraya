@@ -48,7 +48,7 @@ class InventoryController extends Controller
     {
         return view('cashier.inventory.history', [
             'movements' => IngredientStockMovement::query()
-                ->with(['ingredient.unit', 'user'])
+                ->with(['ingredient.unit', 'user', 'order'])
                 ->latest('occurred_at')
                 ->paginate(25),
         ]);

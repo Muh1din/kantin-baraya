@@ -27,10 +27,17 @@
                 <button type="submit" class="rounded-lg bg-orange-500 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">Mulai Memasak</button>
             </form>
         @elseif ($order->order_status === 'in_progress')
-            <form action="{{ route('chef.orders.complete', $order) }}" method="POST">
-                @csrf
-                <button type="submit" class="rounded-lg bg-green-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2">Tandai Selesai</button>
-            </form>
+            <div class="flex items-center justify-end gap-2">
+                <form action="{{ route('chef.orders.cancel', $order) }}" method="POST"
+                    onsubmit="return confirm('Batalkan pesanan ini? Stok bahan yang sudah dikurangi akan dikembalikan.')">
+                    @csrf
+                    <button type="submit" class="rounded-lg border border-red-200 px-3 py-2.5 text-xs font-bold text-red-700 transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">Batalkan</button>
+                </form>
+                <form action="{{ route('chef.orders.complete', $order) }}" method="POST">
+                    @csrf
+                    <button type="submit" class="rounded-lg bg-green-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2">Tandai Selesai</button>
+                </form>
+            </div>
         @else
             <span class="text-xs font-semibold text-green-700">Selesai</span>
         @endif

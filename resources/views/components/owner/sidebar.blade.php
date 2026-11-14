@@ -167,6 +167,15 @@
                 Hari Libur
             </a>
 
+            <a href="{{ route('owner.qris.index') }}" @class([
+                'flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm lg:w-full',
+                'bg-orange-50 font-bold text-orange-700' => request()->routeIs('owner.qris.*'),
+                'font-semibold text-stone-600 transition hover:bg-stone-50 hover:text-orange-700' => !request()->routeIs('owner.qris.*'),
+            ]) @click="mobileNavOpen = false">
+                <span aria-hidden="true">▦</span>
+                Pengaturan QRIS
+            </a>
+
 
             {{-- 3. MANAJEMEN MENU --}}
             <div class="mt-4 px-4 text-[10px] font-bold uppercase tracking-wider text-stone-400">
@@ -196,7 +205,6 @@
                 <span aria-hidden="true">☷</span>
                 Daftar Menu
             </a>
-
 
             {{-- 4. PELANGGAN & LOYALTY --}}
             <div class="mt-4 px-4 text-[10px] font-bold uppercase tracking-wider text-stone-400">

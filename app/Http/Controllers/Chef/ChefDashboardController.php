@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Services\RecipeInventoryService;
+use DomainException;
 use Illuminate\View\View;
 
 class ChefDashboardController extends Controller
@@ -35,23 +37,70 @@ class ChefDashboardController extends Controller
         return view('chef.dashboard', compact('orders', 'status', 'counts', 'knownConfirmedOrderIds'));
     }
 
-    public function startCooking(Order $order)
+    public function startCooking(Order $order, RecipeInventoryService $inventoryService)
     {
-        if ($order->order_status !== 'confirmed') {
-            return back()->with('error', 'Pesanan tidak dalam status confirmed.');
+        $error = null;
+
+        try {
+            DB::transaction(function () use ($order, $inventoryService, &$error) {
+                $lockedOrder = Order::query()->lockForUpdate()->findOrFail($order->id);
+                if ($lockedOrder->order_status !== 'confirmed') {
+                    $error = 'Pesanan tidak dalam status confirmed.';
+
+                    return;
+                }
+
+                $inventoryService->consumeForOrder($lockedOrder, Auth::id());
+                $lockedOrder->update(['order_status' => 'in_progress']);
+                $lockedOrder->statusHistories()->create([
+                    'old_status' => 'confirmed',
+                    'new_status' => 'in_progress',
+                    'changed_by' => Auth::id(),
+                    'notes' => 'Chef mulai mengerjakan pesanan.',
+                ]);
+            });
+        } catch (DomainException $exception) {
+            return back()->with('error', $exception->getMessage());
         }
 
-        DB::transaction(function () use ($order) {
-            $order->update(['order_status' => 'in_progress']);
-            $order->statusHistories()->create([
-                'old_status' => 'confirmed',
-                'new_status' => 'in_progress',
-                'changed_by' => Auth::id(),
-                'notes' => 'Chef mulai mengerjakan pesanan',
-            ]);
-        });
+        if ($error) {
+            return back()->with('error', $error);
+        }
 
         return back()->with('success', 'Pesanan mulai dikerjakan.');
+    }
+
+    public function cancelCooking(Order $order, RecipeInventoryService $inventoryService)
+    {
+        $error = null;
+
+        try {
+            DB::transaction(function () use ($order, $inventoryService, &$error) {
+                $lockedOrder = Order::query()->lockForUpdate()->findOrFail($order->id);
+                if ($lockedOrder->order_status !== 'in_progress') {
+                    $error = 'Hanya pesanan yang sedang diproses yang dapat dibatalkan dari antrean Koki.';
+
+                    return;
+                }
+
+                $inventoryService->restoreForCancelledOrder($lockedOrder, Auth::id());
+                $lockedOrder->update(['order_status' => 'cancelled']);
+                $lockedOrder->statusHistories()->create([
+                    'old_status' => 'in_progress',
+                    'new_status' => 'cancelled',
+                    'changed_by' => Auth::id(),
+                    'notes' => 'Pesanan dibatalkan Koki; bahan baku yang sudah dipakai dikembalikan ke stok.',
+                ]);
+            });
+        } catch (DomainException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
+
+        if ($error) {
+            return back()->with('error', $error);
+        }
+
+        return back()->with('success', 'Pesanan dibatalkan dan bahan baku yang dipakai sudah dikembalikan.');
     }
 
     public function complete(Order $order)

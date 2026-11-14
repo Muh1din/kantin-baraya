@@ -79,8 +79,9 @@ class RecipeController extends Controller
 
         try {
             DB::transaction(function () use ($menu, $rows): void {
+                $lockedMenu = Menu::query()->lockForUpdate()->findOrFail($menu->id);
                 foreach ($rows as $row) {
-                    $menu->recipeIngredients()->create([
+                    $lockedMenu->recipeIngredients()->create([
                         'ingredient_id' => $row['ingredient_id'],
                         'quantity' => $row['quantity'],
                     ]);
@@ -105,7 +106,10 @@ class RecipeController extends Controller
             'quantity' => ['required', 'numeric', 'decimal:0,3', 'gt:0', 'max:999999999999999.999'],
         ]);
 
-        $menuIngredient->update(['quantity' => $validated['quantity']]);
+        DB::transaction(function () use ($menu, $menuIngredient, $validated): void {
+            Menu::query()->lockForUpdate()->findOrFail($menu->id);
+            $menuIngredient->update(['quantity' => $validated['quantity']]);
+        });
 
         return redirect()
             ->route('owner.recipes.show', $menu)
@@ -115,7 +119,10 @@ class RecipeController extends Controller
     public function destroyIngredient(Menu $menu, MenuIngredient $menuIngredient): RedirectResponse
     {
         abort_unless($menuIngredient->menu_id === $menu->id, 404);
-        $menuIngredient->delete();
+        DB::transaction(function () use ($menu, $menuIngredient): void {
+            Menu::query()->lockForUpdate()->findOrFail($menu->id);
+            $menuIngredient->delete();
+        });
 
         return redirect()
             ->route('owner.recipes.show', $menu)

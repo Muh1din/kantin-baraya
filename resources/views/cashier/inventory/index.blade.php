@@ -1,6 +1,7 @@
 <x-layouts.cashier title="Daftar Bahan Baku">
     <div class="space-y-6">
         <header>
+            <h1 class="text-xl font-black text-stone-900">Daftar Bahan Baku</h1>
             <p class="mt-1 text-sm text-stone-500">Cari, tambahkan, dan perbarui informasi bahan baku.</p>
         </header>
 

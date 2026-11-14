@@ -69,11 +69,12 @@ class IngredientStockService
         ?int $userId = null,
         ?string $notes = null,
         ?CarbonInterface $occurredAt = null,
+        ?int $orderId = null,
     ): IngredientStockMovement {
         $change = $this->toMinorUnits($quantityChange);
         $this->validateMovement($movementType, $change, $transactionKey);
 
-        return DB::transaction(function () use ($ingredientId, $movementType, $quantityChange, $change, $transactionKey, $userId, $notes, $occurredAt): IngredientStockMovement {
+        return DB::transaction(function () use ($ingredientId, $movementType, $quantityChange, $change, $transactionKey, $userId, $notes, $occurredAt, $orderId): IngredientStockMovement {
             $ingredient = Ingredient::query()->lockForUpdate()->findOrFail($ingredientId);
 
             $existing = IngredientStockMovement::query()
@@ -113,6 +114,7 @@ class IngredientStockService
             $ingredient->save();
 
             return $ingredient->stockMovements()->create([
+                'order_id' => $orderId,
                 'user_id' => $userId,
                 'movement_type' => $movementType,
                 'quantity_change' => $quantityChange,

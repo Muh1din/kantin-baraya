@@ -21,7 +21,7 @@ class IngredientController extends Controller
             'ingredients' => Ingredient::query()->with('unit')->orderBy('name')->paginate(10),
             'allIngredients' => Ingredient::query()->with('unit')->orderBy('name')->get(),
             'activeIngredients' => Ingredient::query()->where('is_active', true)->orderBy('name')->get(),
-            'recentMovements' => IngredientStockMovement::query()->with(['ingredient.unit', 'user'])->latest('occurred_at')->limit(10)->get(),
+            'recentMovements' => IngredientStockMovement::query()->with(['ingredient.unit', 'user', 'order'])->latest('occurred_at')->limit(10)->get(),
             'units' => Unit::query()->orderBy('name')->get(),
             'stockInToken' => IngredientStockMovementController::issueFormToken(request(), IngredientStockMovement::TYPE_STOCK_IN),
             'adjustmentToken' => IngredientStockMovementController::issueFormToken(request(), IngredientStockMovement::TYPE_ADJUSTMENT),

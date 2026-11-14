@@ -912,6 +912,17 @@ function initializeCart() {
 
     qrisImage?.addEventListener("load", updateQrisImage);
     qrisImage?.addEventListener("error", updateQrisImage);
+    downloadQris?.addEventListener("click", () => {
+        const imageUrl = qrisImage?.getAttribute("src");
+        if (!imageUrl || downloadQris.disabled) return;
+
+        const link = document.createElement("a");
+        link.href = imageUrl;
+        link.download = "kode-qris-kantin-baraya";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    });
 
     // ========================================
     // 20. INISIALISASI

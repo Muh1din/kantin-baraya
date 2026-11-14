@@ -14,6 +14,7 @@ class IngredientStockMovement extends Model
 
     protected $fillable = [
         'ingredient_id',
+        'order_id',
         'user_id',
         'movement_type',
         'quantity_change',
@@ -40,5 +41,10 @@ class IngredientStockMovement extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
     }
 }

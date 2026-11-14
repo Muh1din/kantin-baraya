@@ -4,6 +4,7 @@ namespace Tests\Feature\Customer;
 
 use App\Models\Menu;
 use App\Models\Order;
+use App\Models\OperationalHour;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,6 +15,18 @@ use Tests\TestCase;
 class CustomerOrderingTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        OperationalHour::query()->create([
+            'day_of_week' => now()->dayOfWeek,
+            'open_time' => '08:00',
+            'close_time' => '17:00',
+            'is_closed' => false,
+        ]);
+    }
 
     private function customer(): User
     {
