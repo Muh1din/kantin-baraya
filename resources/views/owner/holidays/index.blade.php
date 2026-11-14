@@ -1,7 +1,6 @@
 <x-layouts.owner title="Hari Libur">
     <div class="space-y-6">
         <header>
-            <h1 class="text-xl font-black text-stone-900">Hari Libur</h1>
             <p class="mt-1 text-sm text-stone-500">Catat tanggal kantin tutup dan hapus hari libur yang tidak berlaku.</p>
         </header>
 

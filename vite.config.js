@@ -12,6 +12,7 @@ export default defineConfig({
                 "resources/js/customer/filter-menu.js",
                 "resources/js/customer/card.js",
                 "resources/js/auth/login.js",
+                "resources/js/auth/register.js",
             ],
             refresh: true,
         }),

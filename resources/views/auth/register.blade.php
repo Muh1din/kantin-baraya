@@ -175,6 +175,11 @@
                             <input id="password" type="password" name="password" required autocomplete="new-password"
                                 placeholder="Buat kata sandi"
                                 class="w-full min-w-0 bg-transparent py-3.5 text-sm outline-none">
+                            <button type="button" data-toggle-password="password" aria-label="Tampilkan kata sandi"
+                                aria-pressed="false" class="shrink-0 rounded-lg p-1 text-typography-muted transition hover:text-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400" aria-controls="password">
+                                <svg data-eye-open aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.5-6 9.75-6 9.75 6 9.75 6-3.5 6-9.75 6-9.75-6-9.75-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+                                <svg data-eye-closed aria-hidden="true" class="hidden h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="m3 3 18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.2A10.8 10.8 0 0 1 12 5c6.25 0 9.75 7 9.75 7a16 16 0 0 1-3.1 3.8M6.2 6.2C3.7 7.8 2.25 12 2.25 12s3.5 7 9.75 7c1.2 0 2.3-.25 3.3-.7"/></svg>
+                            </button>
                         </div>
 
                         @error('password')
@@ -202,6 +207,11 @@
                             <input id="password_confirmation" type="password" name="password_confirmation" required
                                 autocomplete="new-password" placeholder="Ulangi kata sandi"
                                 class="w-full min-w-0 bg-transparent py-3.5 text-sm outline-none">
+                            <button type="button" data-toggle-password="password_confirmation" aria-label="Tampilkan konfirmasi kata sandi"
+                                aria-pressed="false" class="shrink-0 rounded-lg p-1 text-typography-muted transition hover:text-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400" aria-controls="password_confirmation">
+                                <svg data-eye-open aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.5-6 9.75-6 9.75 6 9.75 6-3.5 6-9.75 6-9.75-6-9.75-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+                                <svg data-eye-closed aria-hidden="true" class="hidden h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="m3 3 18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.2A10.8 10.8 0 0 1 12 5c6.25 0 9.75 7 9.75 7a16 16 0 0 1-3.1 3.8M6.2 6.2C3.7 7.8 2.25 12 2.25 12s3.5 7 9.75 7c1.2 0 2.3-.25 3.3-.7"/></svg>
+                            </button>
                         </div>
                     </div>
 

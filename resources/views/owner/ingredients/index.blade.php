@@ -234,7 +234,8 @@
                                             class="font-semibold {{ $ingredient->current_stock <= $ingredient->minimum_stock ? 'text-red-700' : 'text-stone-800' }}">{{ $ingredient->current_stock }}</span>
                                         @if ($ingredient->current_stock <= $ingredient->minimum_stock)
                                             <span
-                                                class="ml-2 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-bold text-red-700">Stok rendah</span>
+                                                class="ml-2 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-bold text-red-700">Stok
+                                                rendah</span>
                                         @endif
                                     </td>
                                     <td class="px-5 py-4">{{ $ingredient->minimum_stock }}</td>
@@ -309,7 +310,8 @@
                                         {{ $movement->quantity_change > 0 ? '+' . $movement->quantity_change : $movement->quantity_change }}
                                     </td>
                                     <td class="px-5 py-4 font-medium text-stone-900">{{ $movement->stock_after }}</td>
-                                    <td class="px-5 py-4 font-semibold text-orange-700">{{ $movement->order?->order_code ?? '—' }}</td>
+                                    <td class="px-5 py-4 font-semibold text-orange-700">
+                                        {{ $movement->order?->order_code ?? '—' }}</td>
                                     <td class="px-5 py-4 text-stone-600">{{ $movement->notes ?: '—' }}</td>
                                 </tr>
                             @endforeach

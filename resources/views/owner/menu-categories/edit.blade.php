@@ -1,5 +1,5 @@
 <x-layouts.owner title="Edit Kategori Menu">
-    <div class="mx-auto max-w-2xl space-y-6">
+    <div class="max-w-2xl space-y-6">
         {{-- Header & Navigasi Kembali --}}
         <div>
             <a href="{{ route('owner.menu-categories.index') }}"

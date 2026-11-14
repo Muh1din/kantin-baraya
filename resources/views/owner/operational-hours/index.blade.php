@@ -1,7 +1,6 @@
 <x-layouts.owner title="Jam Operasional">
     <div class="space-y-6">
         <header>
-            <h1 class="text-xl font-black text-stone-900">Jam Operasional</h1>
             <p class="mt-1 text-sm text-stone-500">Atur jam buka dan tutup untuk setiap hari dalam seminggu.</p>
         </header>
 
