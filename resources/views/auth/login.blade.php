@@ -200,13 +200,6 @@
                         aria-live="polite"></div>
                 </form>
 
-                {{-- REGISTER
-                <div class="my-7 flex items-center gap-4">
-                    <div class="h-px flex-1 bg-gray-200"></div>
-                    <span class="text-xs text-typography-muted">atau</span>
-                    <div class="h-px flex-1 bg-gray-200"></div>
-                </div> --}}
-
                 <p class="text-center text-sm text-typography-body">
                     Belum punya akun?
 
