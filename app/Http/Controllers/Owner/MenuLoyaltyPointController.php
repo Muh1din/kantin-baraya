@@ -21,8 +21,8 @@ class MenuLoyaltyPointController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'points' => ['required', 'array'],
-            'points.*' => ['required', 'integer', 'min:0', 'max:1000000'],
+            'points' => ['array'],
+            'points.*' => ['integer', 'min:0', 'max:1000000'],
         ]);
 
         DB::transaction(function () use ($validated): void {

@@ -51,7 +51,7 @@
                                     <td class="whitespace-nowrap px-5 py-4 text-stone-600">Rp{{ number_format($menu->price, 0, ',', '.') }}</td>
                                     <td class="px-5 py-4 sm:px-6">
                                         <label class="sr-only" for="points-{{ $menu->id }}">Poin untuk {{ $menu->name }}</label>
-                                        <input id="points-{{ $menu->id }}" name="points[{{ $menu->id }}]" type="number" min="0" max="1000000" step="1" required
+                                        <input id="points-{{ $menu->id }}" name="points[{{ $menu->id }}]" type="number" min="0" max="1000000" step="1"
                                             value="{{ old("points.{$menu->id}", $menu->points_per_item) }}"
                                             class="w-32 rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100">
                                         <span class="ml-1 text-stone-500">poin</span>

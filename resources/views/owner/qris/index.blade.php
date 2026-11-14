@@ -1,5 +1,5 @@
 <x-layouts.owner title="Pengaturan QRIS">
-    <div class="mx-auto max-w-3xl space-y-6">
+    <div class="max-w-3xl space-y-6">
         <header>
             <h1 class="text-xl font-black text-stone-900">Pengaturan QRIS</h1>
             <p class="mt-1 text-sm text-stone-500">Gambar ini ditampilkan kepada customer saat memilih pembayaran QRIS.</p>
